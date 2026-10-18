@@ -1,0 +1,154 @@
+11:00:13.696  INFO     [Node 5] Partition [orders-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.699  INFO     [Node 5] Partition [orders-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.701  INFO     [Node 5] Partition [payments-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.705  INFO     [Node 5] Partition [payments-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.706  INFO     [Node 5] Partition [notifications-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.708  INFO     [Node 5] Partition [notifications-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.711  INFO     [Node 5] Partition [audit-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.713  INFO     [Node 5] Partition [audit-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.714  INFO     [Node 5] BrokerStore state restored: 8 partition logs, 0 total records, 0 dedup entries, 0 applied raft indices
+11:00:13.738  INFO     HTTP server listening on port 8005
+11:00:13.739  INFO     [Node 5] Loaded state: term=401 voted_for=5 log_len=37
+11:00:13.740  INFO     [Node 5] Started as FOLLOWER at term 401
+11:00:13.741  INFO     Broker 5 running on port 8005  peers={1: 'localhost:8001', 2: 'localhost:8002', 3: 'localhost:8003', 4: 'localhost:8004', 5: 'localhost:8005'}
+11:00:16.329  INFO     [Node 5] [T401] RequestVote from candidate=2 term=401 lastLogIdx=36 lastLogTerm=400  (my votedFor=5)
+11:00:16.329  INFO     [Node 5] DENY vote: already voted for 5 in term 401
+11:00:16.619  INFO     [Node 5] [T401] RequestVote from candidate=3 term=401 lastLogIdx=36 lastLogTerm=400  (my votedFor=5)
+11:00:16.621  INFO     [Node 5] DENY vote: already voted for 5 in term 401
+11:00:16.647  INFO     [Node 5] [T401] Election timeout fired (2892ms)
+11:00:16.654  INFO     [Node 5] [T402] Became CANDIDATE (lastLogIdx=36 lastLogTerm=400)
+11:00:16.655  INFO     [Node 5] [T402] RequestVote -> peer 1
+11:00:16.656  INFO     [Node 5] [T402] RequestVote -> peer 2
+11:00:16.659  INFO     [Node 5] [T402] RequestVote -> peer 3
+11:00:16.661  INFO     [Node 5] [T402] RequestVote -> peer 4
+11:00:16.935  INFO     [Node 5] [T402] RequestVote from candidate=1 term=401 lastLogIdx=36 lastLogTerm=400  (my votedFor=5)
+11:00:16.936  INFO     [Node 5] DENY vote: candidate term 401 < currentTerm 402
+11:00:17.320  INFO     [Node 5] [T402] RequestVote from candidate=4 term=401 lastLogIdx=36 lastLogTerm=400  (my votedFor=5)
+11:00:17.336  INFO     [Node 5] DENY vote: candidate term 401 < currentTerm 402
+11:00:17.954  INFO     [Node 5] [T402] Vote granted by peer 2  (2/3)
+11:00:17.965  INFO     [Node 5] [T402] Vote granted by peer 1  (3/3)
+11:00:17.965  INFO     [Node 5] [T402] Became LEADER  nextIndex={1: 37, 2: 37, 3: 37, 4: 37}
+11:00:17.970  INFO     [Node 5] [T402] Appended no-op at index 37
+11:00:17.992  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=36 #entries=1
+11:00:17.992  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=36 #entries=1
+11:00:17.993  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=36 #entries=1
+11:00:17.993  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=36 #entries=1
+11:00:19.021  INFO     [Node 5] [T402] peer 1 acked up to index 37
+11:00:19.033  INFO     [Node 5] [T402] commitIndex 0 -> 37  (replicated on 3/5 nodes)
+11:00:19.034  INFO     [Node 5] [T402] peer 2 acked up to index 37
+11:00:19.034  INFO     [Node 5] [T402] peer 4 acked up to index 37
+11:00:19.035  INFO     [Node 5] [T402] peer 3 acked up to index 37
+11:00:19.038  INFO     [Node 5] APPLY index=1 term=1 command={'type': 'no-op'}
+11:00:19.039  INFO     [Node 5] APPLY index=2 term=1 command=set x=42
+11:00:19.040  INFO     [Node 5] APPLY index=3 term=1 command=set y=hello
+11:00:19.040  INFO     [Node 5] APPLY index=4 term=1 command=set z=world
+11:00:19.041  INFO     [Node 5] APPLY index=5 term=3 command={'type': 'no-op'}
+11:00:19.042  INFO     [Node 5] APPLY index=6 term=3 command=order-created-101
+11:00:19.042  INFO     [Node 5] APPLY index=7 term=11 command={'type': 'no-op'}
+11:00:19.042  INFO     [Node 5] APPLY index=8 term=12 command={'type': 'no-op'}
+11:00:19.044  INFO     [Node 5] APPLY index=9 term=13 command={'type': 'no-op'}
+11:00:19.045  INFO     [Node 5] APPLY index=10 term=14 command={'type': 'no-op'}
+11:00:19.045  INFO     [Node 5] APPLY index=11 term=15 command={'type': 'no-op'}
+11:00:19.046  INFO     [Node 5] APPLY index=12 term=310 command={'type': 'no-op'}
+11:00:19.051  INFO     [Node 5] APPLY index=13 term=311 command={'type': 'no-op'}
+11:00:19.052  INFO     [Node 5] APPLY index=14 term=313 command={'type': 'no-op'}
+11:00:19.052  INFO     [Node 5] APPLY index=15 term=314 command={'type': 'no-op'}
+11:00:19.053  INFO     [Node 5] APPLY index=16 term=317 command={'type': 'no-op'}
+11:00:19.053  INFO     [Node 5] APPLY index=17 term=319 command={'type': 'no-op'}
+11:00:19.053  INFO     [Node 5] APPLY index=18 term=321 command={'type': 'no-op'}
+11:00:19.053  INFO     [Node 5] APPLY index=19 term=323 command={'type': 'no-op'}
+11:00:19.054  INFO     [Node 5] APPLY index=20 term=324 command={'type': 'no-op'}
+11:00:19.054  INFO     [Node 5] APPLY index=21 term=326 command={'type': 'no-op'}
+11:00:19.054  INFO     [Node 5] APPLY index=22 term=328 command={'type': 'no-op'}
+11:00:19.054  INFO     [Node 5] APPLY index=23 term=337 command={'type': 'no-op'}
+11:00:19.055  INFO     [Node 5] APPLY index=24 term=353 command={'type': 'no-op'}
+11:00:19.055  INFO     [Node 5] APPLY index=25 term=367 command={'type': 'no-op'}
+11:00:19.056  INFO     [Node 5] APPLY index=26 term=368 command={'type': 'no-op'}
+11:00:19.056  INFO     [Node 5] APPLY index=27 term=371 command={'type': 'no-op'}
+11:00:19.056  INFO     [Node 5] APPLY index=28 term=373 command={'type': 'no-op'}
+11:00:19.057  INFO     [Node 5] APPLY index=29 term=374 command={'type': 'no-op'}
+11:00:19.057  INFO     [Node 5] APPLY index=30 term=376 command={'type': 'no-op'}
+11:00:19.057  INFO     [Node 5] APPLY index=31 term=377 command={'type': 'no-op'}
+11:00:19.058  INFO     [Node 5] APPLY index=32 term=380 command={'type': 'no-op'}
+11:00:19.058  INFO     [Node 5] APPLY index=33 term=383 command={'type': 'no-op'}
+11:00:19.060  INFO     [Node 5] APPLY index=34 term=394 command={'type': 'no-op'}
+11:00:19.060  INFO     [Node 5] APPLY index=35 term=399 command={'type': 'no-op'}
+11:00:19.060  INFO     [Node 5] APPLY index=36 term=400 command={'type': 'no-op'}
+11:00:19.061  INFO     [Node 5] APPLY index=37 term=402 command={'type': 'no-op'}
+11:00:45.664  INFO     [Node 5] Produce received topic=orders msgId=ord-001 key=user-A -> partition=0 (reason=explicit)
+11:00:45.689  INFO     [Node 5] [T402] Proposed command at index 38: {'type': 'produce', 'topic': 'orders', 'partition': 0, 'messageID': 'ord-001', 'key': 'user-A', 'payload': {'item': 'laptop', 'qty': 1}, 'timestamp': 1792301445.684979}
+11:00:46.585  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=37 #entries=1
+11:00:46.664  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=37 #entries=1
+11:00:46.695  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=37 #entries=1
+11:00:46.696  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=37 #entries=1
+11:00:47.624  INFO     [Node 5] [T402] peer 1 acked up to index 38
+11:00:47.679  INFO     [Node 5] [T402] commitIndex 37 -> 38  (replicated on 3/5 nodes)
+11:00:47.680  INFO     [Node 5] [T402] peer 2 acked up to index 38
+11:00:47.681  INFO     [Node 5] [T402] Index 38 committed
+11:00:47.681  INFO     [Node 5] APPLY index=38 term=402 command={'type': 'produce', 'topic': 'orders', 'partition': 0, 'messageID': 'ord-001', 'key': 'user-A', 'payload': {'item': 'laptop', 'qty': 1}, 'timestamp': 1792301445.684979}
+11:00:47.685  INFO     [Node 5] Entry applied to [orders-0] offset=0 (raftIndex=38, msgId=ord-001); HWM=1
+11:00:47.711  INFO     [Node 5] [T402] peer 4 acked up to index 38
+11:00:47.713  INFO     [Node 5] [T402] peer 3 acked up to index 38
+11:00:49.734  INFO     [Node 5] Produce received topic=orders msgId=ord-002 key=user-B -> partition=1 (reason=explicit)
+11:00:49.761  INFO     [Node 5] [T402] Proposed command at index 39: {'type': 'produce', 'topic': 'orders', 'partition': 1, 'messageID': 'ord-002', 'key': 'user-B', 'payload': {'item': 'phone', 'qty': 2}, 'timestamp': 1792301449.7558796}
+11:00:50.041  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=38 #entries=1
+11:00:50.055  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=38 #entries=1
+11:00:50.091  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=38 #entries=1
+11:00:50.091  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=38 #entries=1
+11:00:51.103  INFO     [Node 5] [T402] peer 1 acked up to index 39
+11:00:51.106  INFO     [Node 5] [T402] commitIndex 38 -> 39  (replicated on 3/5 nodes)
+11:00:51.107  INFO     [Node 5] [T402] peer 2 acked up to index 39
+11:00:51.109  INFO     [Node 5] APPLY index=39 term=402 command={'type': 'produce', 'topic': 'orders', 'partition': 1, 'messageID': 'ord-002', 'key': 'user-B', 'payload': {'item': 'phone', 'qty': 2}, 'timestamp': 1792301449.7558796}
+11:00:51.110  INFO     [Node 5] [T402] Index 39 committed
+11:00:51.119  INFO     [Node 5] [T402] peer 4 acked up to index 39
+11:00:51.114  INFO     [Node 5] Entry applied to [orders-1] offset=0 (raftIndex=39, msgId=ord-002); HWM=1
+11:00:51.125  INFO     [Node 5] [T402] peer 3 acked up to index 39
+11:00:53.178  INFO     [Node 5] Produce received topic=payments msgId=pay-001 key=user-A -> partition=0 (reason=explicit)
+11:00:53.207  INFO     [Node 5] [T402] Proposed command at index 40: {'type': 'produce', 'topic': 'payments', 'partition': 0, 'messageID': 'pay-001', 'key': 'user-A', 'payload': {'amount': 1299.99, 'currency': 'USD'}, 'timestamp': 1792301453.2022703}
+11:00:53.474  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=39 #entries=1
+11:00:53.478  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=39 #entries=1
+11:00:53.480  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=39 #entries=1
+11:00:53.488  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=39 #entries=1
+11:00:54.548  INFO     [Node 5] [T402] peer 3 acked up to index 40
+11:00:54.558  INFO     [Node 5] [T402] commitIndex 39 -> 40  (replicated on 3/5 nodes)
+11:00:54.559  INFO     [Node 5] [T402] peer 1 acked up to index 40
+11:00:54.561  INFO     [Node 5] [T402] peer 4 acked up to index 40
+11:00:54.565  INFO     [Node 5] [T402] Index 40 committed
+11:00:54.565  INFO     [Node 5] APPLY index=40 term=402 command={'type': 'produce', 'topic': 'payments', 'partition': 0, 'messageID': 'pay-001', 'key': 'user-A', 'payload': {'amount': 1299.99, 'currency': 'USD'}, 'timestamp': 1792301453.2022703}
+11:00:54.566  INFO     [Node 5] [T402] peer 2 acked up to index 40
+11:00:54.578  INFO     [Node 5] Entry applied to [payments-0] offset=0 (raftIndex=40, msgId=pay-001); HWM=1
+11:00:56.623  INFO     [Node 5] Produce received topic=notifications msgId=notif-001 key=user-A -> partition=0 (reason=explicit)
+11:00:56.648  INFO     [Node 5] [T402] Proposed command at index 41: {'type': 'produce', 'topic': 'notifications', 'partition': 0, 'messageID': 'notif-001', 'key': 'user-A', 'payload': {'channel': 'email', 'body': 'Order received'}, 'timestamp': 1792301456.6437285}
+11:00:56.938  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=40 #entries=1
+11:00:56.941  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=40 #entries=1
+11:00:56.944  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=40 #entries=1
+11:00:56.948  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=40 #entries=1
+11:00:57.981  INFO     [Node 5] [T402] peer 4 acked up to index 41
+11:00:57.982  INFO     [Node 5] [T402] commitIndex 40 -> 41  (replicated on 3/5 nodes)
+11:00:57.983  INFO     [Node 5] [T402] peer 3 acked up to index 41
+11:00:57.984  INFO     [Node 5] [T402] Index 41 committed
+11:00:57.985  INFO     [Node 5] APPLY index=41 term=402 command={'type': 'produce', 'topic': 'notifications', 'partition': 0, 'messageID': 'notif-001', 'key': 'user-A', 'payload': {'channel': 'email', 'body': 'Order received'}, 'timestamp': 1792301456.6437285}
+11:00:57.989  INFO     [Node 5] Entry applied to [notifications-0] offset=0 (raftIndex=41, msgId=notif-001); HWM=1
+11:00:57.990  INFO     [Node 5] [T402] peer 2 acked up to index 41
+11:00:57.991  INFO     [Node 5] [T402] peer 1 acked up to index 41
+11:01:00.036  INFO     [Node 5] Produce received topic=audit msgId=aud-001 key=system -> partition=1 (reason=explicit)
+11:01:00.055  INFO     [Node 5] [T402] Proposed command at index 42: {'type': 'produce', 'topic': 'audit', 'partition': 1, 'messageID': 'aud-001', 'key': 'system', 'payload': {'action': 'user_checkout'}, 'timestamp': 1792301460.0511663}
+11:01:00.344  INFO     [Node 5] [T402] -> peer 3: AppendEntries prevIdx=41 #entries=1
+11:01:00.347  INFO     [Node 5] [T402] -> peer 4: AppendEntries prevIdx=41 #entries=1
+11:01:00.353  INFO     [Node 5] [T402] -> peer 2: AppendEntries prevIdx=41 #entries=1
+11:01:00.370  INFO     [Node 5] [T402] -> peer 1: AppendEntries prevIdx=41 #entries=1
+11:01:01.411  INFO     [Node 5] [T402] peer 4 acked up to index 42
+11:01:01.416  INFO     [Node 5] [T402] commitIndex 41 -> 42  (replicated on 3/5 nodes)
+11:01:01.417  INFO     [Node 5] [T402] peer 1 acked up to index 42
+11:01:01.449  INFO     [Node 5] [T402] Index 42 committed
+11:01:01.449  INFO     [Node 5] APPLY index=42 term=402 command={'type': 'produce', 'topic': 'audit', 'partition': 1, 'messageID': 'aud-001', 'key': 'system', 'payload': {'action': 'user_checkout'}, 'timestamp': 1792301460.0511663}
+11:01:01.457  INFO     [Node 5] Entry applied to [audit-1] offset=0 (raftIndex=42, msgId=aud-001); HWM=1
+11:01:01.458  INFO     [Node 5] [T402] peer 3 acked up to index 42
+11:01:01.461  INFO     [Node 5] [T402] peer 2 acked up to index 42
+11:01:05.599  INFO     [Node 5] Pre-check duplicate detected: topic=orders msgId=ord-001 -> partition=0 offset=0
+11:02:10.148  INFO     [Node 5] Pre-check duplicate detected: topic=orders msgId=ord-001 -> partition=0 offset=0
+11:02:12.219  INFO     [Node 5] Pre-check duplicate detected: topic=orders msgId=ord-002 -> partition=1 offset=0
+11:02:14.270  INFO     [Node 5] Pre-check duplicate detected: topic=payments msgId=pay-001 -> partition=0 offset=0
+11:02:16.319  INFO     [Node 5] Pre-check duplicate detected: topic=notifications msgId=notif-001 -> partition=0 offset=0
+11:02:18.376  INFO     [Node 5] Pre-check duplicate detected: topic=audit msgId=aud-001 -> partition=1 offset=0
+11:02:22.442  INFO     [Node 5] Pre-check duplicate detected: topic=orders msgId=ord-001 -> partition=0 offset=0

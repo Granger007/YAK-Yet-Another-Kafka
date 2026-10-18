@@ -1,6 +1,6 @@
 {
-  "current_term": 11,
-  "voted_for": null,
+  "current_term": 403,
+  "voted_for": 4,
   "log": [
     {
       "index": 0,
@@ -47,6 +47,330 @@
       "command": {
         "type": "no-op"
       }
+    },
+    {
+      "index": 8,
+      "term": 12,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 9,
+      "term": 13,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 10,
+      "term": 14,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 11,
+      "term": 15,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 12,
+      "term": 310,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 13,
+      "term": 311,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 14,
+      "term": 313,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 15,
+      "term": 314,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 16,
+      "term": 317,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 17,
+      "term": 319,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 18,
+      "term": 321,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 19,
+      "term": 323,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 20,
+      "term": 324,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 21,
+      "term": 326,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 22,
+      "term": 328,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 23,
+      "term": 337,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 24,
+      "term": 353,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 25,
+      "term": 367,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 26,
+      "term": 368,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 27,
+      "term": 371,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 28,
+      "term": 373,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 29,
+      "term": 374,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 30,
+      "term": 376,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 31,
+      "term": 377,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 32,
+      "term": 380,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 33,
+      "term": 383,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 34,
+      "term": 394,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 35,
+      "term": 399,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 36,
+      "term": 400,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 37,
+      "term": 402,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 38,
+      "term": 402,
+      "command": {
+        "type": "produce",
+        "topic": "orders",
+        "partition": 0,
+        "messageID": "ord-001",
+        "key": "user-A",
+        "payload": {
+          "item": "laptop",
+          "qty": 1
+        },
+        "timestamp": 1792301445.684979
+      }
+    },
+    {
+      "index": 39,
+      "term": 402,
+      "command": {
+        "type": "produce",
+        "topic": "orders",
+        "partition": 1,
+        "messageID": "ord-002",
+        "key": "user-B",
+        "payload": {
+          "item": "phone",
+          "qty": 2
+        },
+        "timestamp": 1792301449.7558796
+      }
+    },
+    {
+      "index": 40,
+      "term": 402,
+      "command": {
+        "type": "produce",
+        "topic": "payments",
+        "partition": 0,
+        "messageID": "pay-001",
+        "key": "user-A",
+        "payload": {
+          "amount": 1299.99,
+          "currency": "USD"
+        },
+        "timestamp": 1792301453.2022703
+      }
+    },
+    {
+      "index": 41,
+      "term": 402,
+      "command": {
+        "type": "produce",
+        "topic": "notifications",
+        "partition": 0,
+        "messageID": "notif-001",
+        "key": "user-A",
+        "payload": {
+          "channel": "email",
+          "body": "Order received"
+        },
+        "timestamp": 1792301456.6437285
+      }
+    },
+    {
+      "index": 42,
+      "term": 402,
+      "command": {
+        "type": "produce",
+        "topic": "audit",
+        "partition": 1,
+        "messageID": "aud-001",
+        "key": "system",
+        "payload": {
+          "action": "user_checkout"
+        },
+        "timestamp": 1792301460.0511663
+      }
+    },
+    {
+      "index": 43,
+      "term": 403,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 44,
+      "term": 403,
+      "command": {
+        "type": "produce",
+        "topic": "orders",
+        "partition": 0,
+        "messageID": "ord-after-kill",
+        "key": null,
+        "payload": "resilience-test",
+        "timestamp": 1792301552.6002355
+      }
+    },
+    {
+      "index": 45,
+      "term": 403,
+      "command": "order-created-101"
+    },
+    {
+      "index": 46,
+      "term": 403,
+      "command": "stock-deduct-qty-5"
+    },
+    {
+      "index": 47,
+      "term": 403,
+      "command": "payment-settled-success"
     }
   ]
 }

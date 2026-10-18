@@ -48,6 +48,10 @@ class RaftTransport:
         with self._lock:
             return peer_id in self._blocked
 
+    def get_blocked(self) -> list:
+        with self._lock:
+            return sorted(list(self._blocked))
+
     # ------------------------------------------------------------------
     # RPC callers
     # ------------------------------------------------------------------

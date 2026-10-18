@@ -1,0 +1,1 @@
+{"offset": 0, "topic": "payments", "partition": 0, "messageID": "pay-001", "key": "user-A", "payload": {"amount": 1299.99, "currency": "USD"}, "timestamp": 1792301453.2022703, "raftIndex": 40}

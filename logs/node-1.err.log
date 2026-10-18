@@ -1,0 +1,13 @@
+11:00:13.404  INFO     [Node 1] Partition [orders-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.406  INFO     [Node 1] Partition [orders-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.408  INFO     [Node 1] Partition [payments-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.410  INFO     [Node 1] Partition [payments-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.412  INFO     [Node 1] Partition [notifications-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.413  INFO     [Node 1] Partition [notifications-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.415  INFO     [Node 1] Partition [audit-0] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.417  INFO     [Node 1] Partition [audit-1] restored 0 records; logEndOffset=0, HWM=0
+11:00:13.418  INFO     [Node 1] BrokerStore state restored: 8 partition logs, 0 total records, 0 dedup entries, 0 applied raft indices
+11:00:13.443  INFO     HTTP server listening on port 8001
+11:00:13.445  INFO     [Node 1] Loaded state: term=400 voted_for=3 log_len=37
+11:00:13.448  INFO     [Node 1] Started as FOLLOWER at term 400
+11:00:13.449  INFO     Broker 1 running on port 8001  peers={1: 'localhost:8001', 2: 'localhost:8002', 3: 'localhost:8003', 4: 'localhost:8004', 5: 'localhost:8005'}

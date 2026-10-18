@@ -1,7 +1,8 @@
-# raft-broker  -  Phase 1: Raft Consensus Layer
+# raft-broker - Kafka-like Distributed Message Broker
 
-A from-scratch 5-node Raft consensus cluster in **pure Python** (stdlib only).
-This is Phase 1 of a Kafka-like distributed message broker.
+A from-scratch distributed message broker in **pure Python** (stdlib only).
+- **Phase 1**: 5-node Raft Consensus Core (elections, log replication, commit, partition simulation).
+- **Phase 2**: Replicated State Machine (Topics, Partitions, Offsets, High Watermark, Deduplication).
 
 ---
 
@@ -10,218 +11,180 @@ This is Phase 1 of a Kafka-like distributed message broker.
 ```
 raft-broker/
 +-- raft/
-¦   +-- rpc.py        # LogEntry, RequestVote*, AppendEntries* dataclasses
-¦   +-- storage.py    # Atomic-write JSON persistence (currentTerm, votedFor, log)
-¦   +-- transport.py  # HTTP client (urllib); partition simulation
-¦   +-- node.py       # Full Raft state machine (election, replication, commit)
-+-- server/
-¦   +-- handlers.py   # Route handler functions
-¦   +-- server.py     # ThreadingHTTPServer wiring
+â”‚   +-- rpc.py        # LogEntry, RequestVote*, AppendEntries* dataclasses
+â”‚   +-- storage.py    # Atomic-write JSON persistence (currentTerm, votedFor, log)
+â”‚   +-- transport.py  # HTTP client (urllib); partition simulation
+â”‚   +-- node.py       # Full Raft state machine (election, replication, commit)
 +-- broker/
-¦   +-- broker.py     # CLI entry point (argparse)
+â”‚   +-- broker.py     # CLI entry point (argparse)
+â”‚   +-- config.py     # Topic and partition configuration parser
+â”‚   +-- hash.py       # Deterministic FNV-1a partition selection
+â”‚   +-- partition.py  # Append-only partition log with sequential offsets and HWM
+â”‚   +-- store.py      # BrokerStore replicated state machine (apply, dedup, recovery)
++-- server/
+â”‚   +-- handlers.py   # Route handlers (/debug/produce, /debug/fetch, /topics, etc.)
+â”‚   +-- server.py     # ThreadingHTTPServer wiring + CORS support
 +-- tests/
-¦   +-- test_raft.py  # Multi-process integration tests
+â”‚   +-- test_raft.py    # Multi-process Raft tests (10 tests)
+â”‚   +-- test_broker.py  # Multi-process Phase 2 Broker tests (12 tests)
 +-- scripts/
-¦   +-- start-cluster.sh   # Start all 5 nodes (Linux/macOS)
-¦   +-- stop-cluster.sh
-¦   +-- kill-restart.sh
-¦   +-- start-cluster.bat  # Windows equivalents
-¦   +-- stop-cluster.bat
-¦   +-- kill-restart.bat
-+-- Makefile
+â”‚   +-- start-cluster.ps1  # Windows PowerShell cluster launcher
+â”‚   +-- stop-cluster.ps1   # Windows PowerShell cluster stopper
+â”‚   +-- start-cluster.bat  # Windows batch equivalents
+â”‚   +-- stop-cluster.bat
+â”‚   +-- kill-restart.bat
+â”‚   +-- start-cluster.sh   # Linux/macOS equivalents
+â”‚   +-- stop-cluster.sh
+â”‚   +-- kill-restart.sh
++-- raft_dashboard.html    # Live visual control plane
 ```
 
 ---
 
 ## Requirements
 
-- Python 3.8+ (stdlib only, no pip installs)
-- `pytest` for running tests (`pip install pytest`)
+- Python 3.8+ (stdlib only, no pip installs required for runtime)
+- `pytest` for running integration tests (`pip install pytest`)
 
 ---
 
-## Running the cluster
+## Architecture: Replicated State Machine
 
-### Linux / macOS
-
-```bash
-cd raft-broker
-bash scripts/start-cluster.sh        # start all 5 nodes
-tail -f logs/node-1.log              # watch logs
-bash scripts/stop-cluster.sh         # stop all
-```
-
-### Windows (PowerShell / cmd)
-
-```bat
-cd raft-broker
-scripts\start-cluster.bat
-scripts\stop-cluster.bat
-```
-
-### Manually (any OS)
-
-```bash
-# Start nodes in 5 separate terminals:
-python -m broker.broker --id 1 --port 8001 --peers 2:localhost:8002,3:localhost:8003,4:localhost:8004,5:localhost:8005
-python -m broker.broker --id 2 --port 8002 --peers 1:localhost:8001,3:localhost:8003,4:localhost:8004,5:localhost:8005
-python -m broker.broker --id 3 --port 8003 --peers 1:localhost:8001,2:localhost:8002,4:localhost:8004,5:localhost:8005
-python -m broker.broker --id 4 --port 8004 --peers 1:localhost:8001,2:localhost:8002,3:localhost:8003,5:localhost:8005
-python -m broker.broker --id 5 --port 8005 --peers 1:localhost:8001,2:localhost:8002,3:localhost:8003,4:localhost:8004
-```
-
-Optional flags:
-| Flag | Default | Description |
-|---|---|---|
-| `--election-min-ms` | 1500 | Min election timeout |
-| `--election-max-ms` | 3000 | Max election timeout |
-| `--heartbeat-ms` | 300 | Leader heartbeat interval |
-| `--data-dir` | `data/node-<id>` | Persistent state directory |
-| `--log-level` | INFO | DEBUG / INFO / WARNING |
+1. **One Raft Group**: The whole cluster runs a single Raft consensus group. The Raft log is the single source of truth; each entry's `command` is an opaque payload.
+2. **State Machine (`BrokerStore`)**:
+   - Implements `apply(entry)` which Raft calls strictly in commit order.
+   - Non-broker commands and Raft no-op entries pass through harmlessly.
+   - Offsets, deduplication, and High Watermark (HWM) are decided **inside Apply** (never at proposal time), ensuring every broker arrives at identical state.
+3. **Topics & Partitions**:
+   - Default: 4 topics with 2 partitions each (`orders:2,payments:2,notifications:2,audit:2`).
+   - Configurable via `--topics` flag or `RAFT_TOPICS` environment variable.
+   - Persisted as append-only logs under `data/node-<id>/partitions/<topic>-<partition>.log`.
+4. **Offsets & High Watermark (HWM)**:
+   - Each partition log is append-only with sequential offsets starting at 0.
+   - `logEndOffset` = next offset to write = total records in partition log.
+   - `HWM = logEndOffset`. Consumers may only read offsets `< HWM`.
+   - Idempotency: `Apply` tracks applied Raft indices so replaying after restart never creates duplicates.
+5. **Deterministic Partition Selection**:
+   - Explicit partition: uses requested partition if in range `[0, numPartitions - 1]`.
+   - Key: `partition = fnv1a(key) % numPartitions`.
+   - Message ID: `partition = fnv1a(messageID) % numPartitions` (deterministic retry).
+6. **Two-Level Deduplication**:
+   - Dedup key: `(topic, messageID) -> (partition, offset)`.
+   - Leader fast pre-check: returns existing offset immediately without proposing.
+   - Authoritative check in Apply: prevents duplicate writes if identical requests were in flight.
+   - Dedup map is rebuilt from partition logs on restart.
 
 ---
 
-## Kill & restart a node
+## HTTP Endpoints
 
-```bash
-# Linux/macOS
-bash scripts/kill-restart.sh kill    3
-bash scripts/kill-restart.sh restart 3
+### 1. `POST /debug/produce`
+Produce a message to the cluster.
+- **Request**:
+  ```json
+  {
+    "topic": "orders",
+    "messageID": "ord-101",
+    "key": "user-42",
+    "partition": 0,
+    "payload": { "item": "book", "price": 29.99 }
+  }
+  ```
+- **Responses**:
+  - `200 OK`: `{"topic": "orders", "partition": 0, "offset": 0, "duplicate": false, "hwm": 1}`
+  - `307 Temporary Redirect`: Returned on followers, pointing to the leader.
+  - `400 Bad Request`: Invalid partition, empty messageID, or malformed JSON.
+  - `404 Not Found`: Unknown topic.
+  - `503 Service Unavailable`: No leader currently elected.
+  - `504 Gateway Timeout`: Timed out waiting for Raft commit and apply.
 
-# Windows
-scripts\kill-restart.bat kill    3
-scripts\kill-restart.bat restart 3
-```
+### 2. `GET /debug/fetch?topic=orders&partition=0&offset=0&max=10`
+Fetch committed records from a partition. Allowed on any node to verify follower replication.
+- **Response**:
+  ```json
+  {
+    "topic": "orders",
+    "partition": 0,
+    "offset": 0,
+    "hwm": 1,
+    "logEndOffset": 1,
+    "records": [
+      {
+        "offset": 0,
+        "topic": "orders",
+        "partition": 0,
+        "messageID": "ord-101",
+        "key": "user-42",
+        "payload": { "item": "book", "price": 29.99 },
+        "timestamp": 1792300000.0,
+        "raftIndex": 2
+      }
+    ]
+  }
+  ```
 
----
+### 3. `GET /topics`
+Inspect all topics and per-partition metrics.
+- **Response**:
+  ```json
+  {
+    "topics": {
+      "orders": {
+        "0": { "logEndOffset": 1, "hwm": 1, "recordCount": 1 },
+        "1": { "logEndOffset": 0, "hwm": 0, "recordCount": 0 }
+      },
+      "payments": { ... },
+      "notifications": { ... },
+      "audit": { ... }
+    }
+  }
+  ```
 
-## HTTP endpoints
-
-### `GET /status`
+### 4. `GET /status`
+Returns Raft consensus status extended with broker state:
 ```json
 {
   "id": 1,
   "role": "leader",
   "current_term": 2,
-  "voted_for": 1,
-  "leader_id": 1,
-  "commit_index": 4,
-  "last_applied": 4,
-  "log_length": 4,
-  "last_log_index": 4,
-  "last_log_term": 2
+  "total_records_applied": 1,
+  "partition_hwms": {
+    "orders-0": 1,
+    "orders-1": 0,
+    "payments-0": 0,
+    "payments-1": 0,
+    "notifications-0": 0,
+    "notifications-1": 0,
+    "audit-0": 0,
+    "audit-1": 0
+  }
 }
 ```
 
-### `GET /metadata/leader`
-```json
-{ "leader_id": 1, "leader_address": null }
-```
-`leader_address` is null on the leader itself; followers return `"localhost:8001"`.
-
-### `POST /debug/propose`
-```bash
-curl -s -X POST http://localhost:8001/debug/propose \
-     -H 'Content-Type: application/json' \
-     -d '{"data": "hello world"}' | python3 -m json.tool
-```
-Returns `{"committed": true, "log_index": 3}` on success.
-Returns HTTP 307 `{"error": "not the leader", "leader_address": "localhost:8001"}` on follower.
-
-### `POST /debug/partition`
-```bash
-# Isolate node 3 from nodes 4 and 5
-curl -s -X POST http://localhost:8003/debug/partition \
-     -H 'Content-Type: application/json' \
-     -d '{"blocked": [4, 5]}' | python3 -m json.tool
-
-# Clear partition
-curl -s -X POST http://localhost:8003/debug/partition \
-     -d '{"blocked": []}' -H 'Content-Type: application/json'
-```
-
-### Raft internal RPCs (for node-to-node communication)
-```
-POST /raft/requestVote
-POST /raft/appendEntries
-```
-
 ---
 
-## Running the tests
+## Running the Cluster
 
-```bash
-cd raft-broker
-python -m pytest tests/test_raft.py -v
+### Windows (PowerShell)
+```powershell
+scripts\start-cluster.ps1     # Starts all 5 nodes in background
+scripts\stop-cluster.ps1      # Stops all nodes
 ```
 
-Tests use real OS processes on ports 19001-19060 so they do NOT conflict with a
-running cluster on ports 8001-8005.
-
----
-
-## Demo walkthrough
-
+### Linux / macOS
 ```bash
-# 1. Start cluster
 bash scripts/start-cluster.sh
-sleep 5
-
-# 2. Find the leader
-curl -s http://localhost:8001/status | python3 -m json.tool
-curl -s http://localhost:8002/status | python3 -m json.tool
-# ... look for "role": "leader"
-
-# 3. Propose some entries (replace 8001 with the leader port)
-curl -s -X POST http://localhost:8001/debug/propose \
-     -H 'Content-Type: application/json' -d '{"data": "msg-1"}' | python3 -m json.tool
-curl -s -X POST http://localhost:8001/debug/propose \
-     -H 'Content-Type: application/json' -d '{"data": "msg-2"}' | python3 -m json.tool
-
-# 4. Verify replication on a follower
-curl -s http://localhost:8002/status | python3 -m json.tool
-
-# 5. Kill the leader (example: leader is node 1)
-bash scripts/kill-restart.sh kill 1
-sleep 5
-
-# 6. Watch re-election on the remaining nodes
-curl -s http://localhost:8002/status | python3 -m json.tool
-
-# 7. Propose on new leader
-curl -s -X POST http://localhost:8002/debug/propose \
-     -H 'Content-Type: application/json' -d '{"data": "msg-3"}' | python3 -m json.tool
-
-# 8. Restart old leader - it rejoins as follower
-bash scripts/kill-restart.sh restart 1
-sleep 3
-curl -s http://localhost:8001/status | python3 -m json.tool
-
-# 9. Simulate a minority partition
-curl -s -X POST http://localhost:8004/debug/partition -H 'Content-Type: application/json' -d '{"blocked":[1,2,3]}'
-curl -s -X POST http://localhost:8005/debug/partition -H 'Content-Type: application/json' -d '{"blocked":[1,2,3]}'
-# Nodes 4 & 5 cannot elect a leader (no quorum)
-sleep 5
-curl -s http://localhost:8004/status | python3 -m json.tool   # should show candidate/follower, NOT leader
-
-# 10. Clear partition
-curl -s -X POST http://localhost:8004/debug/partition -d '{"blocked":[]}' -H 'Content-Type: application/json'
-curl -s -X POST http://localhost:8005/debug/partition -d '{"blocked":[]}' -H 'Content-Type: application/json'
+bash scripts/stop-cluster.sh
 ```
 
 ---
 
-## How each Raft rule maps to code
+## Running Tests
 
-| Rule | Location |
-|---|---|
-| **Startup (rule 1)**: all nodes begin as Followers, term=0, empty log | `node.py: RaftNode.__init__` |
-| **Election timer (rule 2)**: randomised 1500-3000ms, reset on valid AppendEntries or vote granted | `node.py: _election_timer_loop`, `_reset_election_timer` |
-| **Become candidate (rule 3)**: increment term, vote self, send RequestVote in parallel | `node.py: _start_election` |
-| **RequestVote handler (rule 4)**: term check, one-vote-per-term, log up-to-date check | `node.py: handle_request_vote` |
-| **Majority ? leader (rule 5)**: quorum counter in ask_peer closures; no-op appended | `node.py: _become_leader` |
-| **Higher term ? step down (rule 6)**: every RPC handler calls `_step_down(new_term)` | `node.py: _step_down` |
-| **Log replication (rule 7)**: nextIndex/matchIndex per peer; mismatch ? decrement & retry | `node.py: _PeerReplicator._replicate_once` |
-| **Commit rule (rule 8)**: advance only for currentTerm entries; majority matchIndex check | `node.py: _try_advance_commit` |
-| **Persistence (rule 9)**: atomic JSON write before every RPC response | `storage.py: RaftStorage.save`, `node.py: _save_persistent` |
-| **Opaque command (rule 10)**: `LogEntry.command: Any` accepts any JSON-serialisable value | `rpc.py: LogEntry` |
+```bash
+# Run all Phase 1 Raft consensus tests (10 tests)
+python -m pytest tests/test_raft.py -v
+
+# Run all Phase 2 Broker tests (12 tests)
+python -m pytest tests/test_broker.py -v
+```

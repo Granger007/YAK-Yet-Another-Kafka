@@ -1,0 +1,1 @@
+{"offset": 0, "topic": "orders", "partition": 1, "messageID": "ord-002", "key": "user-B", "payload": {"item": "phone", "qty": 2}, "timestamp": 1792301449.7558796, "raftIndex": 39}

@@ -1,0 +1,1 @@
+{"offset": 0, "topic": "notifications", "partition": 0, "messageID": "notif-001", "key": "user-A", "payload": {"channel": "email", "body": "Order received"}, "timestamp": 1792301456.6437285, "raftIndex": 41}

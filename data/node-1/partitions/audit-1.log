@@ -1,0 +1,1 @@
+{"offset": 0, "topic": "audit", "partition": 1, "messageID": "aud-001", "key": "system", "payload": {"action": "user_checkout"}, "timestamp": 1792301460.0511663, "raftIndex": 42}

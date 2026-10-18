@@ -1,0 +1,2 @@
+{"offset": 0, "topic": "orders", "partition": 0, "messageID": "ord-001", "key": "user-A", "payload": {"item": "laptop", "qty": 1}, "timestamp": 1792301445.684979, "raftIndex": 38}
+{"offset": 1, "topic": "orders", "partition": 0, "messageID": "ord-after-kill", "key": null, "payload": "resilience-test", "timestamp": 1792301552.6002355, "raftIndex": 44}

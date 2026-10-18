@@ -33,6 +33,8 @@ from raft.node      import RaftNode
 from raft.storage   import RaftStorage
 from raft.transport import RaftTransport
 from server.server  import RaftServer
+from broker.config  import BrokerConfig, DEFAULT_TOPICS_SPEC
+from broker.store   import BrokerStore
 
 
 def parse_peers(raw: str) -> dict:
@@ -63,6 +65,8 @@ def main():
                         help="HTTP listen port (or env RAFT_PORT)")
     parser.add_argument("--peers",           type=str, default=os.environ.get("RAFT_PEERS", ""),
                         help="id:host:port[,id:host:port,...] (or env RAFT_PEERS)")
+    parser.add_argument("--topics",          type=str, default=os.environ.get("RAFT_TOPICS", None),
+                        help="Topic config: name:parts[,name:parts] (default: orders:2,payments:2,notifications:2,audit:2)")
     parser.add_argument("--data-dir",        type=str, default=os.environ.get("RAFT_DATA_DIR", ""),
                         help="State directory (or env RAFT_DATA_DIR)")
     parser.add_argument("--election-min-ms", type=int, default=int(os.environ.get("RAFT_ELECTION_MIN_MS", "1500")),
@@ -82,6 +86,13 @@ def main():
         datefmt="%H:%M:%S",
     )
 
+    # ---- Fail-fast configuration validation ----
+    try:
+        broker_config = BrokerConfig.parse(args.topics)
+    except ValueError as exc:
+        logging.critical("Failed to load broker topics configuration: %s", exc)
+        sys.exit(1)
+
     # ---- Peers ----
     peers = parse_peers(args.peers) if args.peers else {}
 
@@ -92,6 +103,8 @@ def main():
     # ---- Build components ----
     storage   = RaftStorage(data_dir)
     transport = RaftTransport(args.id)
+    store     = BrokerStore(node_id=args.id, data_dir=data_dir, config=broker_config)
+
     node      = RaftNode(
         node_id               = args.id,
         peers                 = peers,
@@ -101,7 +114,10 @@ def main():
         election_timeout_max_ms = args.election_max_ms,
         heartbeat_interval_ms   = args.heartbeat_ms,
     )
-    srv = RaftServer(host="0.0.0.0", port=args.port, node=node)
+    # Hook the broker state machine's apply method into Raft's apply callback
+    node.apply_callback = store.apply
+
+    srv = RaftServer(host="0.0.0.0", port=args.port, node=node, store=store)
 
     # ---- Start ----
     srv.start()

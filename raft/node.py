@@ -218,7 +218,8 @@ class RaftNode:
         heartbeat_interval_ms: int   = 300,
     ):
         self.node_id  = node_id
-        self.peers    = peers
+        # Exclude self from peers list to avoid self-RPCs
+        self.peers    = {pid: addr for pid, addr in peers.items() if pid != node_id}
         self.storage  = storage
         self.transport = transport
 
@@ -236,6 +237,7 @@ class RaftNode:
         self.last_applied: int  = 0
         self.role: Role         = Role.FOLLOWER
         self.leader_id: Optional[int] = None
+        self._is_stopped: bool  = False
 
         # ---- Leader volatile state ----
         self.next_index:  Dict[int, int] = {}
@@ -264,6 +266,13 @@ class RaftNode:
     # ======================================================================
 
     def start(self):
+        self._stop.clear()
+        self._election_reset.clear()
+        self._is_stopped = False
+        with self._lock:
+            self.role = Role.FOLLOWER
+            self.leader_id = None
+
         state = self.storage.load()
         if state:
             self.current_term = state["current_term"]
@@ -290,11 +299,41 @@ class RaftNode:
         )
 
     def stop(self):
+        self._is_stopped = True
         self._stop.set()
         self._election_reset.set()
         with self._lock:
             self._commit_cond.notify_all()
         self._stop_replicators()
+
+    def pause(self):
+        """Simulate crash or pause without stopping HTTP server."""
+        logger.info("[Node %d] Pausing / simulating crash", self.node_id)
+        self.stop()
+
+    def resume(self):
+        """Resume / restart consensus after pause."""
+        logger.info("[Node %d] Resuming node from stopped state", self.node_id)
+        self.start()
+
+    def trigger_election(self) -> bool:
+        """Force candidate election immediately for testing/demo."""
+        with self._lock:
+            if self._is_stopped:
+                return False
+            if self.role == Role.LEADER:
+                return False
+        logger.info("[Node %d] Manual election trigger requested", self.node_id)
+        threading.Thread(target=self._start_election, daemon=True, name=f"node-{self.node_id}-manual-elect").start()
+        return True
+
+    def step_down_leader(self) -> bool:
+        """Force leader to step down to follower."""
+        with self._lock:
+            if self.role == Role.LEADER:
+                self._step_down(self.current_term + 1)
+                return True
+            return False
 
     # ======================================================================
     # Election timer
@@ -806,26 +845,51 @@ class RaftNode:
     def get_status(self) -> dict:
         with self._lock:
             last_log_index = len(self.log) - 1
+            last_log_term  = self.log[-1].term if self.log else 0
+            is_stopped     = getattr(self, "_is_stopped", False)
+            role_str       = "stopped" if is_stopped else self.role.value
+
+            entries = [
+                {
+                    "index": entry.index,
+                    "term": entry.term,
+                    "command": entry.command,
+                    "is_noop": isinstance(entry.command, dict) and entry.command.get("type") == "no-op",
+                }
+                for entry in self.log[1:]
+            ]
+
+            blocked = self.transport.get_blocked() if hasattr(self.transport, "get_blocked") else []
+
             return {
                 "id":             self.node_id,
-                "role":           self.role.value,
+                "role":           role_str,
+                "is_stopped":     is_stopped,
                 "current_term":   self.current_term,
                 "voted_for":      self.voted_for,
                 "leader_id":      self.leader_id,
                 "commit_index":   self.commit_index,
                 "last_applied":   self.last_applied,
-                "log_length":     len(self.log) - 1,
+                "log_length":     last_log_index,
                 "last_log_index": last_log_index,
-                "last_log_term":  self.log[-1].term,
+                "last_log_term":  last_log_term,
+                "blocked":        blocked,
+                "peers":          sorted(list(self.peers.keys())),
+                "match_index":    dict(self.match_index) if self.role == Role.LEADER and not is_stopped else {},
+                "next_index":     dict(self.next_index) if self.role == Role.LEADER and not is_stopped else {},
+                "entries":        entries,
+                "heartbeat_ms":   int(self.heartbeat_interval * 1000),
+                "election_min_ms":int(self.election_timeout_min * 1000),
+                "election_max_ms":int(self.election_timeout_max * 1000),
                 # camelCase aliases
                 "currentTerm":    self.current_term,
                 "votedFor":       self.voted_for,
                 "leaderId":       self.leader_id,
                 "commitIndex":    self.commit_index,
                 "lastApplied":    self.last_applied,
-                "logLength":      len(self.log) - 1,
+                "logLength":      last_log_index,
                 "lastLogIndex":   last_log_index,
-                "lastLogTerm":    self.log[-1].term,
+                "lastLogTerm":    last_log_term,
             }
 
     def get_leader_addr(self) -> Optional[str]:
