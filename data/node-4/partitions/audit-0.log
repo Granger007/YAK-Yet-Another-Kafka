@@ -1,0 +1,5 @@
+{"offset": 0, "topic": "audit", "partition": 0, "messageID": "142de1c9-70b3-4d34-bb7f-0e55cf688f6d", "key": "user8", "payload": {"seq": 8, "ts": 1792305226.614316}, "timestamp": 1792305228.7050703, "raftIndex": 103}
+{"offset": 1, "topic": "audit", "partition": 0, "messageID": "86c95d7b-e805-434c-b1e7-83766f8afb20", "key": "user8", "payload": {"seq": 16, "ts": 1792305276.4634228}, "timestamp": 1792305279.244991, "raftIndex": 113}
+{"offset": 2, "topic": "audit", "partition": 0, "messageID": "9135b356-07e9-405f-a426-65445abf3971", "key": "user4", "payload": {"seq": 32, "ts": 1792305347.448854}, "timestamp": 1792305349.5850484, "raftIndex": 130}
+{"offset": 3, "topic": "audit", "partition": 0, "messageID": "868360d5-72aa-46ca-a6e4-9db38372f324", "key": "user6", "payload": {"seq": 44, "ts": 1792305389.5403786}, "timestamp": 1792305391.6261601, "raftIndex": 142}
+{"offset": 4, "topic": "audit", "partition": 0, "messageID": "ad439305-9c81-4e5c-a8ab-3f3df3dc9887", "key": "user8", "payload": {"seq": 48, "ts": 1792305403.2326293}, "timestamp": 1792305405.3138785, "raftIndex": 146}

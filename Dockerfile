@@ -16,6 +16,9 @@ WORKDIR /app
 COPY raft/ ./raft/
 COPY server/ ./server/
 COPY broker/ ./broker/
+COPY client/ ./client/
+COPY cmd/ ./cmd/
+COPY scripts/ ./scripts/
 COPY conftest.py ./
 
 # Environment defaults

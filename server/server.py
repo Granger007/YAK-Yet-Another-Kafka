@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 from server.handlers import (
     handle_append_entries,
     handle_fetch,
+    handle_fetch_production,
+    handle_message_produce,
     handle_metadata_leader,
     handle_partition,
     handle_produce,
@@ -110,6 +112,10 @@ class _RaftHandler(BaseHTTPRequestHandler):
             parsed = urllib.parse.parse_qs(qs)
             query_dict = {k: v[0] for k, v in parsed.items() if v}
             code, body = handle_fetch(query_dict, getattr(self, "store", None))
+        elif path == "/fetch":
+            parsed = urllib.parse.parse_qs(qs)
+            query_dict = {k: v[0] for k, v in parsed.items() if v}
+            code, body = handle_fetch_production(query_dict, self.node, getattr(self, "store", None))
         else:
             code, body = 404, {"error": "not found"}
         self._send_json(code, body, path)
@@ -131,6 +137,8 @@ class _RaftHandler(BaseHTTPRequestHandler):
             code, resp = handle_propose(body, self.node)
         elif path == "/debug/produce":
             code, resp = handle_produce(body, self.node, getattr(self, "store", None))
+        elif path == "/message":
+            code, resp = handle_message_produce(body, self.node, getattr(self, "store", None))
         elif path == "/debug/partition":
             code, resp = handle_partition(body, self.node)
         elif path in ("/debug/kill", "/debug/stop"):
@@ -165,15 +173,20 @@ class _RaftHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, X-Requested-With")
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Connection", "close")
-        if code == 307 and body.get("leader_address"):
-            redirect_target = "/debug/produce" if req_path == "/debug/produce" else "/debug/propose"
-            self.send_header(
-                "Location",
-                f"http://{body['leader_address']}{redirect_target}",
-            )
-        self.end_headers()
-        self.wfile.write(payload)
-        self.wfile.flush()
+        if code == 307:
+            leader_addr = body.get("leader_address") or body.get("leaderAddress")
+            if leader_addr:
+                redirect_target = self.path if self.path.startswith("/") else f"/{self.path}"
+                self.send_header(
+                    "Location",
+                    f"http://{leader_addr}{redirect_target}",
+                )
+        try:
+            self.end_headers()
+            self.wfile.write(payload)
+            self.wfile.flush()
+        except OSError:
+            pass
         self.close_connection = True
 
 

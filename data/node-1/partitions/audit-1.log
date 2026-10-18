@@ -1,1 +1,9 @@
 {"offset": 0, "topic": "audit", "partition": 1, "messageID": "aud-001", "key": "system", "payload": {"action": "user_checkout"}, "timestamp": 1792301460.0511663, "raftIndex": 42}
+{"offset": 1, "topic": "audit", "partition": 1, "messageID": "3e4299ae-f771-4612-8ff3-c21391dddded", "key": "user5", "payload": {"seq": 4, "ts": 1792305176.066858}, "timestamp": 1792305214.2448428, "raftIndex": 99}
+{"offset": 2, "topic": "audit", "partition": 1, "messageID": "603433a1-8dbd-45a9-bdb0-623ee078b355", "key": "user1", "payload": {"seq": 12, "ts": 1792305261.7731013}, "timestamp": 1792305264.0812798, "raftIndex": 109}
+{"offset": 3, "topic": "audit", "partition": 1, "messageID": "7b4cce73-ec6c-4c86-9e83-27bfd85452d4", "key": "user3", "payload": {"seq": 20, "ts": 1792305303.5687764}, "timestamp": 1792305305.6639414, "raftIndex": 118}
+{"offset": 4, "topic": "audit", "partition": 1, "messageID": "d947b6a1-fc24-4967-a064-946fe189115c", "key": "user9", "payload": {"seq": 24, "ts": 1792305317.8047123}, "timestamp": 1792305319.937837, "raftIndex": 122}
+{"offset": 5, "topic": "audit", "partition": 1, "messageID": "61fc1547-ab6b-4bd0-9173-90514ddce16d", "key": "user5", "payload": {"seq": 28, "ts": 1792305333.4284499}, "timestamp": 1792305335.53711, "raftIndex": 126}
+{"offset": 6, "topic": "audit", "partition": 1, "messageID": "440faa82-4b1d-4298-b643-c98e35bb9185", "key": "user10", "payload": {"seq": 36, "ts": 1792305361.280155}, "timestamp": 1792305363.505586, "raftIndex": 134}
+{"offset": 7, "topic": "audit", "partition": 1, "messageID": "fc4a9b68-1e56-49fc-8929-7c7805798f8b", "key": "user3", "payload": {"seq": 40, "ts": 1792305375.471684}, "timestamp": 1792305377.6394992, "raftIndex": 138}
+{"offset": 8, "topic": "audit", "partition": 1, "messageID": "48a3fc4e-2569-49aa-af66-8e02da8bdb71", "key": "user5", "payload": {"seq": 52, "ts": 1792305416.8063114}, "timestamp": 1792305418.8818514, "raftIndex": 150}

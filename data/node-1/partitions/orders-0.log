@@ -1,2 +1,9 @@
 {"offset": 0, "topic": "orders", "partition": 0, "messageID": "ord-001", "key": "user-A", "payload": {"item": "laptop", "qty": 1}, "timestamp": 1792301445.684979, "raftIndex": 38}
 {"offset": 1, "topic": "orders", "partition": 0, "messageID": "ord-after-kill", "key": null, "payload": "resilience-test", "timestamp": 1792301552.6002355, "raftIndex": 44}
+{"offset": 2, "topic": "orders", "partition": 0, "messageID": "52b3043a-6deb-46dc-97b7-3fcab8c9cd6b", "key": null, "payload": {"item": "test"}, "timestamp": 1792305250.2043445, "raftIndex": 105}
+{"offset": 3, "topic": "orders", "partition": 0, "messageID": "de3bfca7-c809-4252-bb7c-f77c9b6b4939", "key": "user4", "payload": {"seq": 9, "ts": 1792305230.4928854}, "timestamp": 1792305251.527403, "raftIndex": 106}
+{"offset": 4, "topic": "orders", "partition": 0, "messageID": "c434d386-8d72-4460-acec-37c18d836f54", "key": "user4", "payload": {"seq": 21, "ts": 1792305307.5152822}, "timestamp": 1792305309.6214724, "raftIndex": 119}
+{"offset": 5, "topic": "orders", "partition": 0, "messageID": "0f97c45b-23d7-4b7d-a8c3-7b8db75d183e", "key": "user4", "payload": {"seq": 25, "ts": 1792305321.4714687}, "timestamp": 1792305324.050069, "raftIndex": 123}
+{"offset": 6, "topic": "orders", "partition": 0, "messageID": "30b03a3a-e5df-493d-81dd-3f59542fdbfa", "key": "user4", "payload": {"seq": 33, "ts": 1792305350.9410172}, "timestamp": 1792305353.180928, "raftIndex": 131}
+{"offset": 7, "topic": "orders", "partition": 0, "messageID": "6c4c9699-ab49-46f5-9130-a16e466e6daa", "key": "user4", "payload": {"seq": 37, "ts": 1792305364.7491632}, "timestamp": 1792305367.175904, "raftIndex": 135}
+{"offset": 8, "topic": "orders", "partition": 0, "messageID": "a0888a40-5a26-478a-93d4-96155fd46172", "key": "user8", "payload": {"seq": 49, "ts": 1792305406.5992043}, "timestamp": 1792305408.6958857, "raftIndex": 147}

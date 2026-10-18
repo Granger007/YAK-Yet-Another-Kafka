@@ -106,6 +106,83 @@ services:
     networks:
       - raft_net
 
+  producer:
+    build:
+      context: .
+      target: runtime
+    container_name: yak-producer
+    entrypoint: ["python", "cmd/producer.py"]
+    environment:
+      - SEEDS=broker1:8001,broker2:8002,broker3:8003,broker4:8004,broker5:8005
+      - PRODUCER_ID=prod-1
+      - TOPICS=orders,payments,notifications,audit
+      - COUNT=0
+      - INTERVAL=0.5
+      - LEDGER_PATH=/data/producer.ledger
+      - LOG_LEVEL=INFO
+    volumes:
+      - producer_data:/data
+    networks:
+      - raft_net
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+      - broker4
+      - broker5
+
+  consumer1:
+    build:
+      context: .
+      target: runtime
+    container_name: yak-consumer1
+    entrypoint: ["python", "cmd/consumer.py"]
+    environment:
+      - SEEDS=broker1:8001,broker2:8002,broker3:8003,broker4:8004,broker5:8005
+      - CONSUMER_ID=consumer-1
+      - TOPICS=orders,payments
+      - DATA_DIR=/data
+      - STATUS_PORT=9001
+      - LOG_LEVEL=INFO
+    ports:
+      - "9001:9001"
+    volumes:
+      - consumer1_data:/data
+    networks:
+      - raft_net
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+      - broker4
+      - broker5
+
+  consumer2:
+    build:
+      context: .
+      target: runtime
+    container_name: yak-consumer2
+    entrypoint: ["python", "cmd/consumer.py"]
+    environment:
+      - SEEDS=broker1:8001,broker2:8002,broker3:8003,broker4:8004,broker5:8005
+      - CONSUMER_ID=consumer-2
+      - TOPICS=payments,notifications,audit
+      - DATA_DIR=/data
+      - STATUS_PORT=9002
+      - LOG_LEVEL=INFO
+    ports:
+      - "9002:9002"
+    volumes:
+      - consumer2_data:/data
+    networks:
+      - raft_net
+    depends_on:
+      - broker1
+      - broker2
+      - broker3
+      - broker4
+      - broker5
+
 networks:
   raft_net:
     driver: bridge
@@ -116,3 +193,6 @@ volumes:
   broker3_data:
   broker4_data:
   broker5_data:
+  producer_data:
+  consumer1_data:
+  consumer2_data:

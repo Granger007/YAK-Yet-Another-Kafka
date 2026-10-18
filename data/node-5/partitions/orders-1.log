@@ -1,1 +1,8 @@
 {"offset": 0, "topic": "orders", "partition": 1, "messageID": "ord-002", "key": "user-B", "payload": {"item": "phone", "qty": 2}, "timestamp": 1792301449.7558796, "raftIndex": 39}
+{"offset": 1, "topic": "orders", "partition": 1, "messageID": "3a9de62d-bc61-4b89-a8b9-f7908948b7f4", "key": "user10", "payload": {"seq": 5, "ts": 1792305215.6132672}, "timestamp": 1792305217.940622, "raftIndex": 100}
+{"offset": 2, "topic": "orders", "partition": 1, "messageID": "4ce5b4ee-d0e4-45a1-9e56-659087471506", "key": "user10", "payload": {"seq": 13, "ts": 1792305265.364527}, "timestamp": 1792305267.652905, "raftIndex": 110}
+{"offset": 3, "topic": "orders", "partition": 1, "messageID": "78fb0395-8596-4edb-b000-60aa2c66befc", "key": "user7", "payload": {"seq": 17, "ts": 1792305281.217219}, "timestamp": 1792305283.4573066, "raftIndex": 114}
+{"offset": 4, "topic": "orders", "partition": 1, "messageID": "9f6dea68-4a95-4840-af72-d51fa940facd", "key": "user7", "payload": {"seq": 29, "ts": 1792305336.9043949}, "timestamp": 1792305339.1176126, "raftIndex": 127}
+{"offset": 5, "topic": "orders", "partition": 1, "messageID": "6650da37-b73c-4eac-8bca-c020afcfb7f0", "key": "user9", "payload": {"seq": 41, "ts": 1792305378.9585464}, "timestamp": 1792305381.2631316, "raftIndex": 139}
+{"offset": 6, "topic": "orders", "partition": 1, "messageID": "23857ae8-d04d-443f-81eb-328445184832", "key": "user9", "payload": {"seq": 45, "ts": 1792305393.0261645}, "timestamp": 1792305395.2565336, "raftIndex": 143}
+{"offset": 7, "topic": "orders", "partition": 1, "messageID": "f87dda14-072f-491b-ab36-a1acd374b597", "key": "user10", "payload": {"seq": 53, "ts": 1792305420.1906815}, "timestamp": 1792305422.2633042, "raftIndex": 151}

@@ -236,11 +236,24 @@ def handle_produce(body: dict, node: "RaftNode", store: Optional["BrokerStore"])
 def handle_metadata_leader(node: "RaftNode") -> Tuple[int, dict]:
     with node._lock:
         leader_id = node.leader_id
-        # Inline peer lookup to avoid re-entering node._lock
-        if leader_id is not None and leader_id != node.node_id:
+        if leader_id is not None and leader_id == node.node_id:
+            # This node is the leader – advertise our own address
+            self_addr = node.peers.get(node.node_id)  # may be None for single-node
+            leader_addr = self_addr
+        elif leader_id is not None:
             leader_addr = node.peers.get(leader_id)
         else:
             leader_addr = None
+
+    if leader_id is None:
+        # Election in progress – tell clients to retry
+        return 503, {
+            "leaderId": None,
+            "leaderAddress": None,
+            "leader_id": None,
+            "leader_address": None,
+            "error": "no leader elected",
+        }
     return 200, {
         "leaderId": leader_id,
         "leaderAddress": leader_addr,
@@ -353,3 +366,67 @@ def handle_step_down(node: "RaftNode") -> Tuple[int, dict]:
     if ok:
         return 200, {"success": True, "message": "leader stepped down"}
     return 400, {"error": "node is not a leader"}
+
+
+# ---------------------------------------------------------------------------
+# Production endpoints  (POST /message  and  GET /fetch)
+# ---------------------------------------------------------------------------
+
+def handle_message_produce(
+    body: dict, node: "RaftNode", store: Optional["BrokerStore"]
+) -> Tuple[int, dict]:
+    """
+    POST /message
+
+    Production producer endpoint.  Identical semantics to /debug/produce:
+    - Leader validates, dedup pre-check, proposes to Raft, responds only
+      after the entry is committed AND applied to the broker state machine.
+    - Response: {topic, partition, offset, duplicate, hwm}
+    - Follower: 307 with {leaderId, leaderAddress} in body.
+    - No known leader: 503.
+    """
+    return handle_produce(body, node, store)
+
+
+def handle_fetch_production(
+    query_params: dict,
+    node: "RaftNode",
+    store: Optional["BrokerStore"],
+) -> Tuple[int, dict]:
+    """
+    GET /fetch?topic=&partition=&offset=&max=
+
+    Production consumer endpoint.  Leader-only: followers return 307.
+    Returns records from [offset, HWM).  Never returns records at or
+    beyond HWM.  offset >= hwm -> empty list, 200.  offset > hwm -> same.
+    """
+    if getattr(node, "_is_stopped", False):
+        return 503, {"error": "node stopped / offline"}
+
+    if store is None:
+        return 503, {"error": "broker store not initialized"}
+
+    # Leader check – followers redirect
+    from raft.node import Role
+    with node._lock:
+        role = node.role
+        leader_id = node.leader_id
+        if leader_id is not None and leader_id != node.node_id:
+            leader_addr = node.peers.get(leader_id)
+        else:
+            leader_addr = None
+
+    if role != Role.LEADER:
+        if leader_id is not None and leader_addr:
+            return 307, {
+                "error": "not the leader",
+                "leaderId": leader_id,
+                "leaderAddress": leader_addr,
+                "leader_id": leader_id,
+                "leader_address": leader_addr,
+            }
+        return 503, {"error": "no known leader", "leaderId": None}
+
+    # Delegate to the existing /debug/fetch handler (any-node read).
+    # We've already asserted leadership above, so this is safe.
+    return handle_fetch(query_params, store)

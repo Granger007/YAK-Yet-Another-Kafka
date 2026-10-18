@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -997,19 +997,19 @@
   <div class="scenarios-bar">
     <div class="scenarios-title">Consensus Scenarios:</div>
     <button class="btn-scenario" onclick="scenarioIsolateLeader()">
-      <span>💥</span> Isolate Leader
+      <span>ðŸ’¥</span> Isolate Leader
     </button>
     <button class="btn-scenario" onclick="scenarioSplitBrain()">
-      <span>💔</span> Split-Brain ([1,2] vs [3,4,5])
+      <span>ðŸ’”</span> Split-Brain ([1,2] vs [3,4,5])
     </button>
     <button class="btn-scenario" onclick="scenarioHealAll()">
-      <span>💚</span> Heal All Partitions
+      <span>ðŸ’š</span> Heal All Partitions
     </button>
     <button class="btn-scenario" onclick="scenarioResumeAll()">
-      <span>⚡</span> Resume All Nodes
+      <span>âš¡</span> Resume All Nodes
     </button>
     <button class="btn-scenario" onclick="poll(true)">
-      <span>🔄</span> Force Sync Now
+      <span>ðŸ”„</span> Force Sync Now
     </button>
   </div>
 
@@ -1024,7 +1024,7 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">
-          <span>📜</span> Replicated Write-Ahead Log Matrix
+          <span>ðŸ“œ</span> Replicated Write-Ahead Log Matrix
         </div>
         <span class="badge" id="log-count-badge">0 entries</span>
       </div>
@@ -1053,7 +1053,7 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">
-          <span>🚀</span> Client Proposal & Routing
+          <span>ðŸš€</span> Client Proposal & Routing
         </div>
       </div>
 
@@ -1086,7 +1086,7 @@
       <!-- Event Feed -->
       <div class="panel-header" style="margin-top: 6px;">
         <div class="panel-title" style="font-size: 0.8rem;">
-          <span>⚡</span> Live Consensus Event Audit
+          <span>âš¡</span> Live Consensus Event Audit
         </div>
       </div>
       <div class="event-feed" id="event-feed">
@@ -1335,7 +1335,7 @@
         partBox.style.display = 'flex';
         partBox.className = 'partition-warning';
         partBox.innerHTML = `
-      <span>⚠️ Blocked: [${s.blocked.join(', ')}]</span>
+      <span>âš ï¸ Blocked: [${s.blocked.join(', ')}]</span>
       <button title="Clear partition" onclick="clearNodePartition(${id})">&times;</button>
     `;
       } else {
@@ -1421,7 +1421,7 @@
               label = `T${entry.term} ${entry.command}`;
             }
 
-            html += `<td><span class="cell-entry ${cellClass}" title="Term: ${entry.term} | ${isCommitted ? 'Committed' : 'Pending Quorum'}">${label} ${isCommitted ? '✓' : '⏳'}</span></td>`;
+            html += `<td><span class="cell-entry ${cellClass}" title="Term: ${entry.term} | ${isCommitted ? 'Committed' : 'Pending Quorum'}">${label} ${isCommitted ? 'âœ“' : 'â³'}</span></td>`;
           }
         }
         html += `</tr>`;
@@ -1446,7 +1446,7 @@
       if (target === 'auto') {
         const leader = Object.values(clusterState).find(s => s?.role === 'leader');
         if (!leader) {
-          showProposalResult('error', '⚠️ No leader available. Wait for election or target a node directly.');
+          showProposalResult('error', 'âš ï¸ No leader available. Wait for election or target a node directly.');
           return;
         }
         targetNodeId = leader.id;
@@ -1470,12 +1470,12 @@
         const body = await res.json().catch(() => ({}));
 
         if (res.status === 200 && body.committed) {
-          showProposalResult('success', `✓ Committed successfully at Log Index ${body.log_index} (Leader Node ${targetNodeId})`);
+          showProposalResult('success', `âœ“ Committed successfully at Log Index ${body.log_index} (Leader Node ${targetNodeId})`);
           logEvent('COMMITTED', 'tag-leader', `Log entry ${body.log_index} committed by quorum!`);
           input.value = '';
         } else if (res.status === 307) {
           // 307 Follower Redirection demonstration!
-          showProposalResult('redirect', `↪ HTTP 307 Redirect: Node ${targetNodeId} is a follower. Known leader is Node ${body.leader_id} (${body.leader_address || 'localhost:' + portOf(body.leader_id)}). Following redirect...`);
+          showProposalResult('redirect', `â†ª HTTP 307 Redirect: Node ${targetNodeId} is a follower. Known leader is Node ${body.leader_id} (${body.leader_address || 'localhost:' + portOf(body.leader_id)}). Following redirect...`);
           logEvent('REDIRECT', 'tag-term', `Node ${targetNodeId} returned 307 Redirect -> Leader ${body.leader_id}`);
 
           // Auto follow redirect to leader
@@ -1487,17 +1487,17 @@
             }, 8000);
             const leadBody = await leadRes.json().catch(() => ({}));
             if (leadRes.status === 200 && leadBody.committed) {
-              showProposalResult('success', `✓ Followed 307 redirect -> Leader Node ${body.leader_id} committed entry at index ${leadBody.log_index}!`);
+              showProposalResult('success', `âœ“ Followed 307 redirect -> Leader Node ${body.leader_id} committed entry at index ${leadBody.log_index}!`);
               logEvent('COMMITTED', 'tag-leader', `Entry ${leadBody.log_index} committed via leader redirection!`);
               input.value = '';
             }
           }
         } else {
-          showProposalResult('error', `❌ Propose rejected: ${body.error || 'Server error'}`);
+          showProposalResult('error', `âŒ Propose rejected: ${body.error || 'Server error'}`);
           logEvent('FAILED', 'tag-crash', `Proposal failed: ${body.error || res.statusText}`);
         }
       } catch (err) {
-        showProposalResult('error', `❌ Network error connecting to Node ${targetNodeId}: ${err.message}`);
+        showProposalResult('error', `âŒ Network error connecting to Node ${targetNodeId}: ${err.message}`);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Propose';
@@ -1671,7 +1671,7 @@
       }
       const id = leader.id;
       const others = NODES.filter(p => p !== id);
-      logEvent('SCENARIO', 'tag-crash', `⚡ ISOLATING LEADER NODE ${id} FROM ALL PEERS`);
+      logEvent('SCENARIO', 'tag-crash', `âš¡ ISOLATING LEADER NODE ${id} FROM ALL PEERS`);
 
       // Block all peers from leader and leader from all peers
       await fetchWithTimeout(urlOf(id, '/debug/partition'), {
@@ -1693,7 +1693,7 @@
     }
 
     async function scenarioSplitBrain() {
-      logEvent('SCENARIO', 'tag-partition', `⚡ SPLIT BRAIN: Partitioning [1, 2] vs [3, 4, 5]`);
+      logEvent('SCENARIO', 'tag-partition', `âš¡ SPLIT BRAIN: Partitioning [1, 2] vs [3, 4, 5]`);
       const groupA = [1, 2];
       const groupB = [3, 4, 5];
 
@@ -1716,7 +1716,7 @@
     }
 
     async function scenarioHealAll() {
-      logEvent('SCENARIO', 'tag-leader', `⚡ HEALING ALL NETWORK PARTITIONS`);
+      logEvent('SCENARIO', 'tag-leader', `âš¡ HEALING ALL NETWORK PARTITIONS`);
       for (const id of NODES) {
         await fetchWithTimeout(urlOf(id, '/debug/partition'), {
           method: 'POST',
@@ -1728,7 +1728,7 @@
     }
 
     async function scenarioResumeAll() {
-      logEvent('SCENARIO', 'tag-leader', `⚡ RESUMING ALL PAUSED / STOPPED NODES`);
+      logEvent('SCENARIO', 'tag-leader', `âš¡ RESUMING ALL PAUSED / STOPPED NODES`);
       for (const id of NODES) {
         await fetchWithTimeout(urlOf(id, '/debug/resume'), {
           method: 'POST',
