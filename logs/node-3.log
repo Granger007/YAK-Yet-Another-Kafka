@@ -1,0 +1,40 @@
+08:12:19.589  INFO     HTTP server listening on port 8003
+08:12:19.590  INFO     [Node 3] Loaded state: term=1 voted_for=3 log_len=5
+08:12:19.591  INFO     [Node 3] Started as FOLLOWER at term 1
+08:12:19.591  INFO     Broker 3 running on port 8003  peers={1: 'localhost:8001', 2: 'localhost:8002', 3: 'localhost:8003', 4: 'localhost:8004', 5: 'localhost:8005'}
+08:12:22.527  INFO     [Node 3] [T1] RequestVote from 4 has higher term 2 -> step down
+08:12:22.532  INFO     [Node 3] [T2] RequestVote from candidate=4 term=2 lastLogIdx=4 lastLogTerm=1  (my votedFor=None)
+08:12:22.540  INFO     [Node 3] [T2] GRANT vote to candidate 4
+08:12:23.056  INFO     [Node 3] [T2] RequestVote from candidate=2 term=2 lastLogIdx=4 lastLogTerm=1  (my votedFor=4)
+08:12:23.061  INFO     [Node 3] DENY vote: already voted for 4 in term 2
+08:12:23.305  INFO     [Node 3] [T2] RequestVote from candidate=5 term=2 lastLogIdx=4 lastLogTerm=1  (my votedFor=4)
+08:12:23.305  INFO     [Node 3] DENY vote: already voted for 4 in term 2
+08:12:23.463  INFO     [Node 3] [T2] RequestVote from candidate=1 term=2 lastLogIdx=4 lastLogTerm=1  (my votedFor=4)
+08:12:23.464  INFO     [Node 3] DENY vote: already voted for 4 in term 2
+08:12:25.246  INFO     [Node 3] [T2] Election timeout fired (2693ms)
+08:12:25.249  INFO     [Node 3] [T3] Became CANDIDATE (lastLogIdx=4 lastLogTerm=1)
+08:12:25.252  INFO     [Node 3] [T3] RequestVote -> peer 1
+08:12:25.255  INFO     [Node 3] [T3] RequestVote -> peer 2
+08:12:25.256  INFO     [Node 3] [T3] RequestVote -> peer 3
+08:12:25.258  INFO     [Node 3] [T3] RequestVote -> peer 4
+08:12:25.308  INFO     [Node 3] [T3] RequestVote -> peer 5
+08:12:25.765  INFO     [Node 3] [T3] RequestVote from candidate=4 term=3 lastLogIdx=4 lastLogTerm=1  (my votedFor=3)
+08:12:25.765  INFO     [Node 3] DENY vote: already voted for 3 in term 3
+08:12:25.934  INFO     [Node 3] [T3] RequestVote from candidate=2 term=3 lastLogIdx=4 lastLogTerm=1  (my votedFor=3)
+08:12:25.934  INFO     [Node 3] DENY vote: already voted for 3 in term 3
+08:12:26.341  INFO     [Node 3] [T3] Vote denied by peer 5
+08:12:26.342  INFO     [Node 3] [T3] Vote denied by peer 2
+08:12:26.371  INFO     [Node 3] [T3] Vote denied by peer 1
+08:12:26.373  INFO     [Node 3] [T3] Vote denied by peer 4
+08:12:26.385  INFO     [Node 3] [T3] RequestVote from candidate=3 term=3 lastLogIdx=4 lastLogTerm=1  (my votedFor=3)
+08:12:26.386  INFO     [Node 3] [T3] GRANT vote to candidate 3
+08:12:26.387  INFO     [Node 3] [T3] Vote granted by peer 3  (2/4)
+08:12:26.812  INFO     [Node 3] [T3] Reverting to FOLLOWER: AppendEntries from leader 4
+08:12:26.812  INFO     [Node 3] [T3] AppendEntries from leader 4: prevIdx=4 prevTerm=1 #entries=1 leaderCommit=0
+08:12:26.814  INFO     [Node 3] [T3] Appended 1 entries; log now has 5 real entries
+08:12:27.834  INFO     [Node 3] [T3] commitIndex 0 -> 5 (from leaderCommit=5)
+08:12:27.835  INFO     [Node 3] APPLY index=1 term=1 command={'type': 'no-op'}
+08:12:27.835  INFO     [Node 3] APPLY index=2 term=1 command=set x=42
+08:12:27.835  INFO     [Node 3] APPLY index=3 term=1 command=set y=hello
+08:12:27.835  INFO     [Node 3] APPLY index=4 term=1 command=set z=world
+08:12:27.835  INFO     [Node 3] APPLY index=5 term=3 command={'type': 'no-op'}

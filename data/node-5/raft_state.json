@@ -1,0 +1,52 @@
+{
+  "current_term": 11,
+  "voted_for": 2,
+  "log": [
+    {
+      "index": 0,
+      "term": 0,
+      "command": null
+    },
+    {
+      "index": 1,
+      "term": 1,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 2,
+      "term": 1,
+      "command": "set x=42"
+    },
+    {
+      "index": 3,
+      "term": 1,
+      "command": "set y=hello"
+    },
+    {
+      "index": 4,
+      "term": 1,
+      "command": "set z=world"
+    },
+    {
+      "index": 5,
+      "term": 3,
+      "command": {
+        "type": "no-op"
+      }
+    },
+    {
+      "index": 6,
+      "term": 3,
+      "command": "order-created-101"
+    },
+    {
+      "index": 7,
+      "term": 11,
+      "command": {
+        "type": "no-op"
+      }
+    }
+  ]
+}

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raft Cluster – Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0e1a;
+    --surface: #13162b;
+    --surface2: #1a1e35;
+    --border: #252a4a;
+    --leader: #10b981;
+    --leader-glow: rgba(16,185,129,.35);
+    --candidate: #f59e0b;
+    --follower: #6366f1;
+    --follower-glow: rgba(99,102,241,.2);
+    --dead: #374151;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #6366f1;
+    --danger: #ef4444;
+    --success: #10b981;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ---- Layout ---- */
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.5px; }
+  header h1 span { background: linear-gradient(135deg, #6366f1, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: .75rem; color: var(--muted); font-family: var(--mono); }
+  #tick-badge { margin-left: auto; }
+
+  .grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 24px; }
+
+  /* ---- Node card ---- */
+  .node-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 16px;
+    transition: border-color .3s, box-shadow .3s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .node-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .node-card.leader  { border-color: var(--leader); box-shadow: 0 0 22px var(--leader-glow); }
+  .node-card.leader::before  { background: radial-gradient(ellipse at 50% 0%, var(--leader-glow) 0%, transparent 70%); opacity: 1; }
+  .node-card.candidate { border-color: var(--candidate); box-shadow: 0 0 16px rgba(245,158,11,.25); }
+  .node-card.follower  { border-color: var(--follower); box-shadow: 0 0 10px var(--follower-glow); }
+  .node-card.dead { border-color: var(--dead); opacity: .55; }
+  .node-card.pulse { animation: pulse-anim .5s ease; }
+  @keyframes pulse-anim { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+
+  .node-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .node-name { font-size: 1.05rem; font-weight: 700; }
+  .role-pill {
+    font-size: .68rem; font-weight: 600; padding: 3px 10px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: .5px;
+  }
+  .pill-leader    { background: rgba(16,185,129,.2); color: var(--leader); border: 1px solid var(--leader); }
+  .pill-candidate { background: rgba(245,158,11,.2); color: var(--candidate); border: 1px solid var(--candidate); }
+  .pill-follower  { background: rgba(99,102,241,.18); color: var(--follower); border: 1px solid var(--follower); }
+  .pill-dead      { background: rgba(55,65,81,.2); color: var(--muted); border: 1px solid var(--dead); }
+
+  .stat { display: flex; justify-content: space-between; font-size: .78rem; margin-bottom: 6px; }
+  .stat-label { color: var(--muted); }
+  .stat-val { font-family: var(--mono); font-weight: 600; color: var(--text); }
+
+  .log-mini { margin-top: 10px; }
+  .log-mini-title { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 5px; }
+  .log-entries { display: flex; flex-direction: column; gap: 3px; min-height: 28px; }
+  .log-entry {
+    font-family: var(--mono); font-size: .63rem; padding: 2px 6px;
+    border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: var(--surface2); color: var(--muted);
+  }
+  .log-entry.committed { color: var(--success); background: rgba(16,185,129,.08); }
+  .log-entry.noop { color: var(--muted); font-style: italic; }
+
+  .node-actions { display: flex; gap: 6px; margin-top: 12px; }
+  .btn-small {
+    flex: 1; padding: 5px 0; border-radius: 7px; border: none; cursor: pointer;
+    font-size: .7rem; font-weight: 600; font-family: var(--font); transition: all .2s;
+  }
+  .btn-kill  { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+  .btn-kill:hover { background: rgba(239,68,68,.3); }
+  .btn-restart { background: rgba(16,185,129,.12); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+  .btn-restart:hover { background: rgba(16,185,129,.25); }
+  .btn-partition { background: rgba(245,158,11,.12); color: var(--candidate); border: 1px solid rgba(245,158,11,.3); }
+  .btn-partition:hover { background: rgba(245,158,11,.25); }
+
+  /* ---- Bottom panels ---- */
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .panel { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; }
+  .panel h2 { font-size: .85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+
+  /* propose form */
+  .propose-form { display: flex; gap: 8px; }
+  .propose-form input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: var(--mono); font-size: .82rem;
+    outline: none; transition: border-color .2s;
+  }
+  .propose-form input:focus { border-color: var(--accent); }
+  .btn-propose {
+    background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff;
+    border: none; border-radius: 8px; padding: 8px 18px; cursor: pointer;
+    font-weight: 600; font-size: .82rem; font-family: var(--font);
+    transition: opacity .2s, transform .1s;
+  }
+  .btn-propose:hover { opacity: .88; }
+  .btn-propose:active { transform: scale(.97); }
+
+  /* event log */
+  .event-log {
+    max-height: 190px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;
+  }
+  .event-log::-webkit-scrollbar { width: 4px; }
+  .event-log::-webkit-scrollbar-track { background: transparent; }
+  .event-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .event { display: flex; gap: 8px; font-size: .75rem; align-items: flex-start; }
+  .event-time { color: var(--muted); font-family: var(--mono); white-space: nowrap; flex-shrink: 0; }
+  .event-msg { color: var(--text); }
+  .event.ok   .event-msg { color: var(--success); }
+  .event.warn .event-msg { color: var(--candidate); }
+  .event.err  .event-msg { color: var(--danger); }
+  .event.info .event-msg { color: #a5b4fc; }
+
+  /* propose result banner */
+  .result-banner {
+    margin-top: 10px; padding: 8px 12px; border-radius: 8px; font-size: .78rem;
+    font-family: var(--mono); display: none;
+  }
+  .result-banner.ok  { background: rgba(16,185,129,.12); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+  .result-banner.err { background: rgba(239,68,68,.1); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+
+  /* partition modal */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    z-index: 100; align-items: center; justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 18px; padding: 28px 24px; width: 360px;
+  }
+  .modal h3 { font-size: 1rem; margin-bottom: 16px; }
+  .modal p { font-size: .82rem; color: var(--muted); margin-bottom: 14px; }
+  .peer-checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .peer-check { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+  .peer-check input { accent-color: var(--candidate); width: 15px; height: 15px; }
+  .modal-btns { display: flex; gap: 8px; }
+  .btn-modal {
+    flex: 1; padding: 9px; border-radius: 8px; border: none; cursor: pointer;
+    font-weight: 600; font-size: .82rem; font-family: var(--font);
+  }
+  .btn-modal-apply { background: rgba(245,158,11,.2); color: var(--candidate); border: 1px solid rgba(245,158,11,.4); }
+  .btn-modal-cancel { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  /* cluster overview bar */
+  .overview {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 12px 18px;
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .ov-item { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+  .ov-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-leader { background: var(--leader); box-shadow: 0 0 6px var(--leader); }
+  .dot-follower { background: var(--follower); }
+  .dot-candidate { background: var(--candidate); }
+  .dot-dead { background: var(--dead); }
+  .ov-label { color: var(--muted); }
+  .ov-val { font-weight: 700; }
+  .ov-sep { width: 1px; height: 18px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ <span>Raft Cluster</span> Dashboard</h1>
+  </div>
+  <div class="badge">5-node cluster · ports 8001–8005</div>
+  <div class="badge" id="tick-badge">⏳ connecting…</div>
+</header>
+
+<div class="overview" id="overview">
+  <div class="ov-item"><div class="ov-dot dot-leader"></div><span class="ov-label">Leader</span>&nbsp;<span class="ov-val" id="ov-leader">—</span></div>
+  <div class="ov-sep"></div>
+  <div class="ov-item"><span class="ov-label">Term</span>&nbsp;<span class="ov-val" id="ov-term">—</span></div>
+  <div class="ov-sep"></div>
+  <div class="ov-item"><span class="ov-label">Committed</span>&nbsp;<span class="ov-val" id="ov-commit">—</span></div>
+  <div class="ov-sep"></div>
+  <div class="ov-item"><div class="ov-dot dot-follower"></div><span class="ov-label">Followers</span>&nbsp;<span class="ov-val" id="ov-followers">—</span></div>
+  <div class="ov-sep"></div>
+  <div class="ov-item"><div class="ov-dot dot-dead"></div><span class="ov-label">Dead</span>&nbsp;<span class="ov-val" id="ov-dead">—</span></div>
+</div>
+
+<div class="grid" id="node-grid"></div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>📨 Propose a log entry</h2>
+    <div class="propose-form">
+      <input id="propose-input" type="text" placeholder="e.g.  set key=hello" />
+      <button class="btn-propose" id="propose-btn" onclick="proposeEntry()">Propose</button>
+    </div>
+    <div class="result-banner" id="result-banner"></div>
+  </div>
+  <div class="panel">
+    <h2>📋 Event log</h2>
+    <div class="event-log" id="event-log"></div>
+  </div>
+</div>
+
+<!-- Partition modal -->
+<div class="modal-backdrop" id="partition-modal">
+  <div class="modal">
+    <h3>🔌 Network Partition – Node <span id="partition-node-label"></span></h3>
+    <p>Select which nodes this node should be <strong>blocked</strong> from (bidirectional recommended).</p>
+    <div class="peer-checks" id="peer-checks"></div>
+    <div class="modal-btns">
+      <button class="btn-modal btn-modal-apply" onclick="applyPartition()">Apply</button>
+      <button class="btn-modal btn-modal-cancel" onclick="closePartition()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Config ----
+const BASE_PORT = 8001;
+const NODE_IDS  = [1, 2, 3, 4, 5];
+const POLL_MS   = 1000;
+
+// ---- State ----
+let nodeStates = {};        // id -> status dict | null
+let killedNodes = new Set();
+let partitionedNode = null;
+let tickCount = 0;
+let prevLeader = null;
+let prevTerm   = null;
+
+// ---- Helpers ----
+const port = id => BASE_PORT + (id - 1);
+const url  = (id, path) => `http://127.0.0.1:${port(id)}${path}`;
+
+async function fetchJSON(u, opts={}) {
+  try {
+    const r = await fetch(u, {signal: AbortSignal.timeout(1800), ...opts});
+    return await r.json();
+  } catch { return null; }
+}
+
+// ---- Event log ----
+function logEvent(msg, cls='info') {
+  const el = document.getElementById('event-log');
+  const now = new Date().toLocaleTimeString('en-GB', {hour12:false});
+  const div = document.createElement('div');
+  div.className = `event ${cls}`;
+  div.innerHTML = `<span class="event-time">${now}</span><span class="event-msg">${msg}</span>`;
+  el.prepend(div);
+  if (el.children.length > 80) el.lastChild.remove();
+}
+
+// ---- Build node card once ----
+function buildCard(id) {
+  const card = document.createElement('div');
+  card.id = `card-${id}`;
+  card.className = 'node-card dead';
+  card.innerHTML = `
+    <div class="node-header">
+      <span class="node-name">Node ${id}</span>
+      <span class="role-pill pill-dead" id="pill-${id}">…</span>
+    </div>
+    <div class="stat"><span class="stat-label">Term</span><span class="stat-val" id="term-${id}">—</span></div>
+    <div class="stat"><span class="stat-label">Voted for</span><span class="stat-val" id="voted-${id}">—</span></div>
+    <div class="stat"><span class="stat-label">Commit idx</span><span class="stat-val" id="commit-${id}">—</span></div>
+    <div class="stat"><span class="stat-label">Log length</span><span class="stat-val" id="loglen-${id}">—</span></div>
+    <div class="log-mini">
+      <div class="log-mini-title">Recent log entries</div>
+      <div class="log-entries" id="log-${id}"></div>
+    </div>
+    <div class="node-actions">
+      <button class="btn-small btn-kill" id="btn-kill-${id}" onclick="killNode(${id})">Kill</button>
+      <button class="btn-small btn-restart" id="btn-restart-${id}" style="display:none" onclick="restartNode(${id})">Restart</button>
+      <button class="btn-small btn-partition" onclick="openPartition(${id})">Partition</button>
+    </div>`;
+  document.getElementById('node-grid').appendChild(card);
+}
+NODE_IDS.forEach(buildCard);
+
+// ---- Update a single node card ----
+function updateCard(id, s) {
+  const card   = document.getElementById(`card-${id}`);
+  const pill   = document.getElementById(`pill-${id}`);
+  const termEl = document.getElementById(`term-${id}`);
+  const votedEl= document.getElementById(`voted-${id}`);
+  const commitEl= document.getElementById(`commit-${id}`);
+  const loglenEl= document.getElementById(`loglen-${id}`);
+  const logEl  = document.getElementById(`log-${id}`);
+  const btnKill= document.getElementById(`btn-kill-${id}`);
+  const btnRst = document.getElementById(`btn-restart-${id}`);
+
+  if (!s) {
+    card.className = 'node-card dead';
+    pill.className = 'role-pill pill-dead'; pill.textContent = killedNodes.has(id) ? 'dead' : '…';
+    termEl.textContent = votedEl.textContent = commitEl.textContent = loglenEl.textContent = '—';
+    logEl.innerHTML = '';
+    btnKill.style.display = 'none';
+    btnRst.style.display  = killedNodes.has(id) ? '' : 'none';
+    return;
+  }
+
+  // Role styling
+  const role = s.role || 'follower';
+  card.className = `node-card ${role}`;
+  if (nodeStates[id]?.role !== role) {
+    card.classList.add('pulse');
+    setTimeout(() => card.classList.remove('pulse'), 600);
+  }
+
+  const pillMap = { leader:'pill-leader', candidate:'pill-candidate', follower:'pill-follower' };
+  pill.className = `role-pill ${pillMap[role] || 'pill-follower'}`;
+  pill.textContent = role.toUpperCase();
+
+  termEl.textContent   = s.current_term ?? '—';
+  votedEl.textContent  = s.voted_for ?? 'none';
+  commitEl.textContent = s.commit_index ?? '—';
+  loglenEl.textContent = s.log_length ?? '—';
+
+  // Mini log – last 3 entries
+  logEl.innerHTML = '';
+  const logLen = s.log_length || 0;
+  // We only have summary counts, show placeholders
+  if (logLen === 0) {
+    logEl.innerHTML = '<div class="log-entry">empty</div>';
+  } else {
+    const ci = s.commit_index || 0;
+    const start = Math.max(1, logLen - 2);
+    for (let i = start; i <= logLen; i++) {
+      const committed = i <= ci;
+      logEl.innerHTML += `<div class="log-entry ${committed?'committed':''}">idx ${i} ${committed?'✓':'⏳'}</div>`;
+    }
+  }
+
+  btnKill.style.display = '';
+  btnRst.style.display  = 'none';
+}
+
+// ---- Poll all nodes ----
+async function poll() {
+  tickCount++;
+  document.getElementById('tick-badge').textContent = `🔄 tick #${tickCount}`;
+
+  const results = await Promise.all(NODE_IDS.map(id =>
+    killedNodes.has(id) ? Promise.resolve(null) : fetchJSON(url(id, '/status'))
+  ));
+
+  // Check for events
+  const alive = results.filter(Boolean);
+  const leaderNode = alive.find(s => s.role === 'leader');
+  const currentLeader = leaderNode ? leaderNode.id : null;
+  const currentTerm   = leaderNode ? leaderNode.current_term : (alive[0]?.current_term ?? null);
+
+  if (currentLeader !== prevLeader) {
+    if (currentLeader) logEvent(`🏆 Node ${currentLeader} is now LEADER (term ${currentTerm})`, 'ok');
+    else               logEvent('⚠️ No leader detected – election in progress…', 'warn');
+    prevLeader = currentLeader;
+  }
+  if (currentTerm && currentTerm !== prevTerm && prevTerm !== null) {
+    logEvent(`📈 Term advanced to ${currentTerm}`, 'info');
+  }
+  prevTerm = currentTerm;
+
+  // Update overview
+  document.getElementById('ov-leader').textContent    = currentLeader ? `Node ${currentLeader}` : '—';
+  document.getElementById('ov-term').textContent      = currentTerm ?? '—';
+  document.getElementById('ov-commit').textContent    = leaderNode ? leaderNode.commit_index : '—';
+  document.getElementById('ov-followers').textContent = alive.filter(s => s.role === 'follower').length;
+  document.getElementById('ov-dead').textContent      = NODE_IDS.length - alive.length;
+
+  // Update cards
+  NODE_IDS.forEach((id, i) => {
+    const prev = nodeStates[id];
+    nodeStates[id] = results[i];
+    updateCard(id, results[i]);
+  });
+
+  document.getElementById('tick-badge').textContent = `✅ tick #${tickCount} · ${alive.length}/5 alive`;
+}
+
+setInterval(poll, POLL_MS);
+poll();
+
+// ---- Propose ----
+async function proposeEntry() {
+  const inp  = document.getElementById('propose-input');
+  const banner = document.getElementById('result-banner');
+  const data = inp.value.trim();
+  if (!data) return;
+
+  banner.style.display = 'none';
+  inp.disabled = true;
+  document.getElementById('propose-btn').textContent = '⏳';
+
+  // Find leader
+  const leader = Object.values(nodeStates).find(s => s?.role === 'leader');
+  if (!leader) {
+    showBanner('No leader available – try again in a moment', 'err');
+    inp.disabled = false; document.getElementById('propose-btn').textContent = 'Propose';
+    return;
+  }
+
+  logEvent(`📝 Proposing "${data}" → Node ${leader.id}`, 'info');
+  const resp = await fetchJSON(url(leader.id, '/debug/propose'), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({data}),
+  });
+
+  inp.disabled = false;
+  document.getElementById('propose-btn').textContent = 'Propose';
+
+  if (resp && resp.committed) {
+    logEvent(`✅ Committed at log index ${resp.log_index}`, 'ok');
+    showBanner(`✅ Committed! log_index = ${resp.log_index}`, 'ok');
+    inp.value = '';
+  } else {
+    const msg = resp?.error || 'Unknown error';
+    logEvent(`❌ Propose failed: ${msg}`, 'err');
+    showBanner(`❌ ${msg}`, 'err');
+  }
+  poll();
+}
+
+function showBanner(msg, cls) {
+  const b = document.getElementById('result-banner');
+  b.textContent = msg;
+  b.className = `result-banner ${cls}`;
+  b.style.display = 'block';
+  setTimeout(() => b.style.display = 'none', 5000);
+}
+
+document.getElementById('propose-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') proposeEntry();
+});
+
+// ---- Kill / Restart ----
+async function killNode(id) {
+  logEvent(`💀 Killing Node ${id}`, 'warn');
+  await fetchJSON(url(id, '/debug/kill'), {method:'POST'}).catch(()=>{});
+  // Send SIGTERM via the management endpoint – fallback: just mark dead
+  // For demo: call the status endpoint a few times to detect death
+  killedNodes.add(id);
+  nodeStates[id] = null;
+  updateCard(id, null);
+}
+
+async function restartNode(id) {
+  // The dashboard can't actually restart OS processes. Tell the user.
+  logEvent(`ℹ️ To restart Node ${id}, run:  python -m broker.broker --id ${id} --port ${port(id)} --peers ... --data-dir data/node-${id}`, 'warn');
+}
+
+// ---- Partition modal ----
+function openPartition(id) {
+  partitionedNode = id;
+  document.getElementById('partition-node-label').textContent = id;
+  const checks = document.getElementById('peer-checks');
+  checks.innerHTML = '';
+  NODE_IDS.filter(pid => pid !== id).forEach(pid => {
+    checks.innerHTML += `
+      <label class="peer-check">
+        <input type="checkbox" id="pcheck-${pid}" value="${pid}" />
+        Node ${pid} (port ${port(pid)})
+      </label>`;
+  });
+  document.getElementById('partition-modal').classList.add('open');
+}
+function closePartition() {
+  document.getElementById('partition-modal').classList.remove('open');
+}
+async function applyPartition() {
+  const id = partitionedNode;
+  const blocked = NODE_IDS.filter(pid => {
+    const cb = document.getElementById(`pcheck-${pid}`);
+    return cb && cb.checked;
+  });
+  closePartition();
+
+  logEvent(`🔌 Node ${id}: blocking peers [${blocked.join(',')}]`, 'warn');
+  await fetchJSON(url(id, '/debug/partition'), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({blocked}),
+  });
+
+  // Apply symmetrically
+  for (const peer of blocked) {
+    await fetchJSON(url(peer, '/debug/partition'), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({blocked: [id]}),
+    });
+    logEvent(`↔️  Node ${peer}: also blocking Node ${id}`, 'info');
+  }
+  if (blocked.length === 0) logEvent(`✅ Node ${id}: all partitions cleared`, 'ok');
+  poll();
+}
+</script>
+</body>
+</html>

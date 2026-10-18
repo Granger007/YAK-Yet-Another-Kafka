@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  broker1:
+    build:
+      context: .
+      target: runtime
+    container_name: raft-broker1
+    environment:
+      - RAFT_ID=1
+      - RAFT_PORT=8001
+      - RAFT_PEERS=2:broker2:8002,3:broker3:8003,4:broker4:8004,5:broker5:8005
+      - RAFT_DATA_DIR=/data
+      - RAFT_ELECTION_MIN_MS=1500
+      - RAFT_ELECTION_MAX_MS=3000
+      - RAFT_HEARTBEAT_MS=300
+      - RAFT_LOG_LEVEL=INFO
+    ports:
+      - "8001:8001"
+    volumes:
+      - broker1_data:/data
+    networks:
+      - raft_net
+
+  broker2:
+    build:
+      context: .
+      target: runtime
+    container_name: raft-broker2
+    environment:
+      - RAFT_ID=2
+      - RAFT_PORT=8002
+      - RAFT_PEERS=1:broker1:8001,3:broker3:8003,4:broker4:8004,5:broker5:8005
+      - RAFT_DATA_DIR=/data
+      - RAFT_ELECTION_MIN_MS=1500
+      - RAFT_ELECTION_MAX_MS=3000
+      - RAFT_HEARTBEAT_MS=300
+      - RAFT_LOG_LEVEL=INFO
+    ports:
+      - "8002:8002"
+    volumes:
+      - broker2_data:/data
+    networks:
+      - raft_net
+
+  broker3:
+    build:
+      context: .
+      target: runtime
+    container_name: raft-broker3
+    environment:
+      - RAFT_ID=3
+      - RAFT_PORT=8003
+      - RAFT_PEERS=1:broker1:8001,2:broker2:8002,4:broker4:8004,5:broker5:8005
+      - RAFT_DATA_DIR=/data
+      - RAFT_ELECTION_MIN_MS=1500
+      - RAFT_ELECTION_MAX_MS=3000
+      - RAFT_HEARTBEAT_MS=300
+      - RAFT_LOG_LEVEL=INFO
+    ports:
+      - "8003:8003"
+    volumes:
+      - broker3_data:/data
+    networks:
+      - raft_net
+
+  broker4:
+    build:
+      context: .
+      target: runtime
+    container_name: raft-broker4
+    environment:
+      - RAFT_ID=4
+      - RAFT_PORT=8004
+      - RAFT_PEERS=1:broker1:8001,2:broker2:8002,3:broker3:8003,5:broker5:8005
+      - RAFT_DATA_DIR=/data
+      - RAFT_ELECTION_MIN_MS=1500
+      - RAFT_ELECTION_MAX_MS=3000
+      - RAFT_HEARTBEAT_MS=300
+      - RAFT_LOG_LEVEL=INFO
+    ports:
+      - "8004:8004"
+    volumes:
+      - broker4_data:/data
+    networks:
+      - raft_net
+
+  broker5:
+    build:
+      context: .
+      target: runtime
+    container_name: raft-broker5
+    environment:
+      - RAFT_ID=5
+      - RAFT_PORT=8005
+      - RAFT_PEERS=1:broker1:8001,2:broker2:8002,3:broker3:8003,4:broker4:8004
+      - RAFT_DATA_DIR=/data
+      - RAFT_ELECTION_MIN_MS=1500
+      - RAFT_ELECTION_MAX_MS=3000
+      - RAFT_HEARTBEAT_MS=300
+      - RAFT_LOG_LEVEL=INFO
+    ports:
+      - "8005:8005"
+    volumes:
+      - broker5_data:/data
+    networks:
+      - raft_net
+
+networks:
+  raft_net:
+    driver: bridge
+
+volumes:
+  broker1_data:
+  broker2_data:
+  broker3_data:
+  broker4_data:
+  broker5_data:

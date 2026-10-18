@@ -1,0 +1,14 @@
+08:18:30.675  INFO     HTTP server listening on port 8004
+08:18:30.676  INFO     [Node 4] Loaded state: term=3 voted_for=4 log_len=7
+08:18:30.677  INFO     [Node 4] Started as FOLLOWER at term 3
+08:18:30.677  INFO     Broker 4 running on port 8004  peers={1: 'localhost:8001', 2: 'localhost:8002', 3: 'localhost:8003', 4: 'localhost:8004', 5: 'localhost:8005'}
+08:18:30.831  INFO     [Node 4] [T11] AppendEntries from leader 2: prevIdx=6 prevTerm=3 #entries=1 leaderCommit=7
+08:18:30.833  INFO     [Node 4] [T11] Appended 1 entries; log now has 7 real entries
+08:18:30.833  INFO     [Node 4] [T11] commitIndex 0 -> 7 (from leaderCommit=7)
+08:18:30.834  INFO     [Node 4] APPLY index=1 term=1 command={'type': 'no-op'}
+08:18:30.834  INFO     [Node 4] APPLY index=2 term=1 command=set x=42
+08:18:30.834  INFO     [Node 4] APPLY index=3 term=1 command=set y=hello
+08:18:30.835  INFO     [Node 4] APPLY index=4 term=1 command=set z=world
+08:18:30.835  INFO     [Node 4] APPLY index=5 term=3 command={'type': 'no-op'}
+08:18:30.835  INFO     [Node 4] APPLY index=6 term=3 command=order-created-101
+08:18:30.835  INFO     [Node 4] APPLY index=7 term=11 command={'type': 'no-op'}
