@@ -7,8 +7,8 @@ if not exist logs  mkdir logs
 if not exist pids  mkdir pids
 if not exist data  mkdir data
 
-set ELECTION_MIN=1500
-set ELECTION_MAX=3000
+set ELECTION_MIN=5000
+set ELECTION_MAX=8000
 set HEARTBEAT=300
 
 set ALL_PEERS=1:localhost:8001,2:localhost:8002,3:localhost:8003,4:localhost:8004,5:localhost:8005

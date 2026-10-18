@@ -1,3 +1,0 @@
-{"offset": 0, "topic": "payments", "partition": 0, "messageID": "pay-001", "key": "user-A", "payload": {"amount": 1299.99, "currency": "USD"}, "timestamp": 1792301453.2022703, "raftIndex": 40}
-{"offset": 1, "topic": "payments", "partition": 0, "messageID": "2ef7a566-dc74-4f0a-a6db-108ff01661ca", "key": "user6", "payload": {"seq": 6, "ts": 1792305219.555093}, "timestamp": 1792305221.810163, "raftIndex": 101}
-{"offset": 2, "topic": "payments", "partition": 0, "messageID": "6bf3e2c8-679e-4a15-9ec7-8f1ba83386fd", "key": "user6", "payload": {"seq": 18, "ts": 1792305285.0630095}, "timestamp": 1792305287.3866682, "raftIndex": 115}

@@ -17,7 +17,7 @@ $peers = "1:localhost:8001,2:localhost:8002,3:localhost:8003,4:localhost:8004,5:
     
     $logFile = "$root\logs\node-$id.log"
     $errFile = "$root\logs\node-$id.err.log"
-    $args = "-m broker.broker --id $id --port $port --peers $peers --data-dir $dataDir --log-level INFO"
+    $args = "-m broker.broker --id $id --port $port --peers $peers --data-dir $dataDir --log-level INFO --election-min-ms 5000 --election-max-ms 8000 --heartbeat-ms 300"
     
     Write-Host "Starting Node $id on port $port..."
     Start-Process -FilePath "python" -ArgumentList $args -WorkingDirectory $root -RedirectStandardOutput $logFile -RedirectStandardError $errFile -WindowStyle Hidden

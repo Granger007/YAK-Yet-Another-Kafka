@@ -1,0 +1,28 @@
+# Runtime data — not committed
+data/
+logs/
+pids/
+
+# Consumer/producer runtime outputs
+*.ledger
+*-processed.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db

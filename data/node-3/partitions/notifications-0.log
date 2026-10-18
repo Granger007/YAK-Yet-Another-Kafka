@@ -1,4 +1,0 @@
-{"offset": 0, "topic": "notifications", "partition": 0, "messageID": "notif-001", "key": "user-A", "payload": {"channel": "email", "body": "Order received"}, "timestamp": 1792301456.6437285, "raftIndex": 41}
-{"offset": 1, "topic": "notifications", "partition": 0, "messageID": "d9998d6c-9fef-4996-a06b-0b13c035e4aa", "key": "user2", "payload": {"seq": 15, "ts": 1792305272.8003206}, "timestamp": 1792305274.9255834, "raftIndex": 112}
-{"offset": 2, "topic": "notifications", "partition": 0, "messageID": "70815007-219b-4565-954c-5f23eada719d", "key": "user6", "payload": {"seq": 23, "ts": 1792305314.3146014}, "timestamp": 1792305316.518425, "raftIndex": 121}
-{"offset": 3, "topic": "notifications", "partition": 0, "messageID": "e534eaa6-3986-4829-92a6-2e9e2f2a0d7e", "key": "user6", "payload": {"seq": 51, "ts": 1792305413.3682787}, "timestamp": 1792305415.4193308, "raftIndex": 149}
