@@ -1,4 +1,4 @@
-# YAK(Yet Another Kafka)- Distributed Message Broker System
+# YAK (Yet Another Kafka) - Distributed Message Broker System
 
 A Kafka-inspired distributed message broker built from scratch in Python, with no
 Raft or messaging libraries. It is a learning project that implements the core
