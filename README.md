@@ -1,6 +1,24 @@
-# raft-broker - Kafka-like Distributed Message Broker
+# YAK(Yet Another Kafka)- Distributed Message Broker System
 
+A Kafka-inspired distributed message broker built from scratch in Go, with no
+Raft or messaging libraries. It is a learning project that implements the core
+ideas behind Kafka and Raft end to end.
 
+## Features
+- **Raft consensus:** 5 brokers with randomized election timeouts, term-based
+  voting, majority quorum, heartbeats, log replication, and persistence
+- **Topics and partitions:** 4 topics x 2 partitions, applied as a replicated
+  state machine on top of the Raft log
+- **Exactly-once writes per messageID:** leader-side and apply-time deduplication
+- **High water mark:** consumers only see committed records
+- **Smart producer:** discovers the leader via `GET /metadata/leader`, caches it,
+  and retries safely with stable UUIDs across failovers
+- **Consumers:** 2 independent consumers that persist their own offsets, with
+  at-least-once delivery and resume after restarts and leader changes
+- **Failure testing:** kill the leader, partition the network, and verify with a
+  ledger that nothing was lost or reordered
+
+  
 ## Project layout
 
 ```
