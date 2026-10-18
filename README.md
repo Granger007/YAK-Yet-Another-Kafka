@@ -1,11 +1,5 @@
 # raft-broker - Kafka-like Distributed Message Broker
 
-A from-scratch distributed message broker in **pure Python** (stdlib only).
-- **Phase 1**: 5-node Raft Consensus Core (elections, log replication, commit, partition simulation).
-- **Phase 2**: Replicated State Machine (Topics, Partitions, Offsets, High Watermark, Deduplication).
-- **Phase 3**: Producer & Consumer Clients, Atomic Offset Persistence, At-Least-Once Delivery, End-to-End Verification.
-
----
 
 ## Project layout
 
